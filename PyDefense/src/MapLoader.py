@@ -89,9 +89,16 @@ class MapLoader(object):
 			
 	def hasTower(self, box):
 		for tower in self.towers:
-			if box.colliderect(tower.location):
+			if box.colliderect(tower.collisionBox):
 				return True
 		return False
 	
+	def getTower(self, x, y):
+		for tower in self.towers:
+			if tower.collisionBox.collidepoint(x,y):
+				return tower
+			
 	def placeTower(self, tower):
 		self.towers.append(tower)
+		
+		

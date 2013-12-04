@@ -43,6 +43,7 @@ archer = Towers.ArcherTower
 mage = Towers.MageTower
 towers = [fighter, archer, mage]
 towerInHand = None
+hoverTower = None
 selectedTower = -1
 
 
@@ -83,7 +84,13 @@ while run:
 			if towerInHand and GUI.money >= towerInHand.cost:
 				drawMap.placeTower(towerInHand)
 				GUI.money -= towerInHand.cost
+				selectedTower = -1
 		
+		#Capture the item hovering over
+		if(event.type == MOUSEMOTION):
+			if towerInHand is None:
+				hoverTower = drawMap.getTower(*pygame.mouse.get_pos())
+				
 	#End Events loop
 	
 	if (selectedTower <> -1):
@@ -96,8 +103,8 @@ while run:
 				tower = towers[selectedTower]()
 				towerInHand = tower
 			
-			tower.location = box
-			windowSurfaceObj.blit(tower.getActiveImage(), (box.x,box.y))
+			tower.setLocation(box)
+			windowSurfaceObj.blit(tower.getActiveImage(), (tower.location.x,tower.location.y))
 			pygame.mouse.set_cursor(*pygame.cursors.arrow)
 		else:
 			pygame.mouse.set_cursor(*pygame.cursors.broken_x)
@@ -108,6 +115,8 @@ while run:
 	
 	if towerInHand:
 		GUI.setSelectedText(towerInHand)
-	#elif HOVERING OVER A PLACED TOWER
+		hoverTower = None
+	elif hoverTower:
+		GUI.setSelectedText(hoverTower)
 	else:
 		GUI.selectedItem = "" 
