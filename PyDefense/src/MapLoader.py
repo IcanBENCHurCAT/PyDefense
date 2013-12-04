@@ -11,6 +11,7 @@ class MapGUI(object):
 	screenH = 0
 	money = 0
 	selectedItem = ""
+	openTower = None
 	font = None
 	
 	def __init__(self, width, height, font):
@@ -21,7 +22,15 @@ class MapGUI(object):
 		self.font = font
 	
 	def setSelectedText(self, tower):
-		self.selectedItem = tower.name
+		if self.openTower is None:
+			self.selectedItem = tower.name
+		
+	def openTowerMenu(self, tower):
+		self.openTower = tower
+		self.setSelectedText(tower)
+	
+	def closeTowerMenu(self):
+		self.openTower = None
 	
 	def render(self, surface):
 		#Print Money top-left
@@ -40,6 +49,9 @@ class MapGUI(object):
 		x = 15
 		y = self.screenH - sizeY - 15
 		surface.blit(i, (x,y))
+		
+		#if self.openTower:
+			
 	
 class MapLoader(object):
 	'''
@@ -89,9 +101,16 @@ class MapLoader(object):
 			
 	def hasTower(self, box):
 		for tower in self.towers:
-			if box.colliderect(tower.location):
+			if box.colliderect(tower.collisionBox):
 				return True
 		return False
 	
+	def getTower(self, x, y):
+		for tower in self.towers:
+			if tower.collisionBox.collidepoint(x,y):
+				return tower
+			
 	def placeTower(self, tower):
 		self.towers.append(tower)
+		
+		

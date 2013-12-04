@@ -20,6 +20,7 @@ fpsClock = pygame.time.Clock()
 
 windowSurfaceObj = pygame.display.set_mode((screenW,screenH))
 pygame.display.set_caption("PyDefense 0.1")
+backgroundColor = (255,255,255)
 #screen = pygame.Surface((screenW, screenH))
 
 drawMap = MapLoader.MapLoader("../assets/Level1.tmx")
@@ -43,6 +44,7 @@ archer = Towers.ArcherTower
 mage = Towers.MageTower
 towers = [fighter, archer, mage]
 towerInHand = None
+hoverTower = None
 selectedTower = -1
 
 
@@ -52,6 +54,10 @@ paused = True
 while run:
 	pygame.display.update()
 	fpsClock.tick(30)
+	if paused == False:
+		windowSurfaceObj.fill(backgroundColor)
+		drawMap.render(windowSurfaceObj)
+		GUI.render(windowSurfaceObj)
 	for event in pygame.event.get():
 		if (event.type == QUIT): 
 			run = False
@@ -59,9 +65,9 @@ while run:
 		if paused == True:
 			if (event.type == KEYDOWN):
 				paused = False
-		else:
-			drawMap.render(windowSurfaceObj)
-			GUI.render(windowSurfaceObj)
+# 		else:
+# 			drawMap.render(windowSurfaceObj)
+# 			GUI.render(windowSurfaceObj)
 		
 		#Using this for debugging currently. Shows that certain areas have been marked as 'placeable'
 		if (event.type == KEYDOWN ):
@@ -75,6 +81,7 @@ while run:
 				selectedTower = 2
 			if (event.key == K_ESCAPE ):
 				selectedTower = -1
+				GUI.closeTowerMenu()
 			
 			if selectedTower <> -1:
 				towerInHand = None
@@ -83,7 +90,15 @@ while run:
 			if towerInHand and GUI.money >= towerInHand.cost:
 				drawMap.placeTower(towerInHand)
 				GUI.money -= towerInHand.cost
+				selectedTower = -1
+			elif hoverTower:
+				GUI.openTowerMenu(hoverTower)
 		
+		#Capture the item hovering over
+		if(event.type == MOUSEMOTION):
+			if towerInHand is None:
+				hoverTower = drawMap.getTower(*pygame.mouse.get_pos())
+				
 	#End Events loop
 	
 	if (selectedTower <> -1):
@@ -96,8 +111,8 @@ while run:
 				tower = towers[selectedTower]()
 				towerInHand = tower
 			
-			tower.location = box
-			windowSurfaceObj.blit(tower.getActiveImage(), (box.x,box.y))
+			tower.setLocation(box)
+			windowSurfaceObj.blit(tower.getActiveImage(Transparent=True), (tower.location.x,tower.location.y))
 			pygame.mouse.set_cursor(*pygame.cursors.arrow)
 		else:
 			pygame.mouse.set_cursor(*pygame.cursors.broken_x)
@@ -108,6 +123,8 @@ while run:
 	
 	if towerInHand:
 		GUI.setSelectedText(towerInHand)
-	#elif HOVERING OVER A PLACED TOWER
+		hoverTower = None
+	elif hoverTower:
+		GUI.setSelectedText(hoverTower)
 	else:
 		GUI.selectedItem = "" 
