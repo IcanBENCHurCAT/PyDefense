@@ -11,6 +11,8 @@ class Tower(object):
 	delay = 1
 	cost = 20
 	upgradeCost = 20
+	location = pygame.Rect(0,0,0,0)
+	name = ""
 	
 	def __init__(self, imagepaths):
 		for path in imagepaths:
@@ -29,9 +31,11 @@ class FighterTower(Tower):
 		super(FighterTower, self).__init__(paths)
 		self.damage = 2
 		self.delay = 2
+		self.name = "Fighter Level 1"
 	
 	def upgrade(self):
 		self.damage += 1
+		self.name = "Fighter Level ", self.level
 		super(FighterTower, self).upgrade(self)
 		
 class ArcherTower(Tower):
@@ -41,9 +45,11 @@ class ArcherTower(Tower):
 		super(ArcherTower, self).__init__(paths)
 		self.damage = 1
 		self.delay = 1
+		self.name = "Archer Level 1"
 		
 	def upgrade(self):
 		self.delay -= 1
+		self.name = "Archer Level ", self.level
 		super(ArcherTower, self).upgrade(self)
 		
 class MageTower(Tower):
@@ -53,7 +59,9 @@ class MageTower(Tower):
 		super(MageTower, self).__init__(paths)
 		self.damage = 3
 		self.delay = 3
+		self.name = "Mage Level 1"
 		
 	def upgrade(self):
 		self.damage += 1
+		self.name = "Mage Level ", self.level
 		super(MageTower, self).upgrade(self)
