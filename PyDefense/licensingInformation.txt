@@ -1,4 +1,7 @@
 LICENSING INFORMATION:
-	Mountain backdrop and spritesheet (grass, enemies)
-	I edited the spritesheet into individual pieces, but made no alterations to the actual images
+
+Mountain backdrop and spritesheet (grass, enemies)
 	http://opengameart.org/content/tower-defense-prototyping-assets-4-monsters-some-tiles-a-background-image
+
+Tower characters:
+	http://pousse.rapiere.free.fr/tome/

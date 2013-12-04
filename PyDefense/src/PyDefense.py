@@ -8,6 +8,7 @@ import pygame, sys
 
 from pygame.locals import *
 import MapLoader
+import Towers
 
 #Need to make this dynamic
 screenW = 640
@@ -32,10 +33,14 @@ x = (screenW / 2) - (sizeX / 2)
 y = (screenH / 2) - (sizeY / 2)
 windowSurfaceObj.blit(i, (x,y))
 
-red = pygame.Color(255, 0, 0)
-green = pygame.Color(0, 255, 0)
-blue = pygame.Color(0, 0, 255)
-towers = [red,green,blue]
+archer = Towers.ArcherTower()
+fighter = Towers.FighterTower()
+mage = Towers.MageTower()
+# red = pygame.Color(255, 0, 0)
+# green = pygame.Color(0, 255, 0)
+# blue = pygame.Color(0, 0, 255)
+# towers = [red,green,blue]
+towers = [fighter, archer, mage]
 selectedTower = -1
 run = True
 paused = True
@@ -64,13 +69,15 @@ while run:
 				selectedTower = 2
 			if (event.key == K_ESCAPE ):
 				selectedTower = -1
-		
-		if (selectedTower <> -1):
-			box = drawMap.getPlaceable(pygame.mouse.get_pos())
-			if box: 
-				pygame.draw.rect(windowSurfaceObj, towers[selectedTower], box)
-				pygame.mouse.set_cursor(*pygame.cursors.arrow)
-			else:
-				pygame.mouse.set_cursor(*pygame.cursors.broken_x)
-		else:
+	#End Events loop
+	
+	if (selectedTower <> -1):
+		box = drawMap.getPlaceable(pygame.mouse.get_pos())
+		if box: 
+			windowSurfaceObj.blit(towers[selectedTower].getActiveImage(), (box.x,box.y))
+			#pygame.draw.rect(windowSurfaceObj, towers[selectedTower].getActiveImage(), box)
 			pygame.mouse.set_cursor(*pygame.cursors.arrow)
+		else:
+			pygame.mouse.set_cursor(*pygame.cursors.broken_x)
+	else:
+		pygame.mouse.set_cursor(*pygame.cursors.arrow)
