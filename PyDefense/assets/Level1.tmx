@@ -128,7 +128,7 @@
    <tile gid="18"/>
    <tile gid="19"/>
    <tile gid="44"/>
-   <tile gid="17"/>
+   <tile gid="29"/>
    <tile gid="10"/>
    <tile gid="11"/>
    <tile gid="11"/>
@@ -147,8 +147,8 @@
    <tile gid="10"/>
    <tile gid="10"/>
    <tile gid="11"/>
-   <tile gid="14"/>
-   <tile gid="9"/>
+   <tile gid="22"/>
+   <tile gid="43"/>
    <tile gid="18"/>
    <tile gid="19"/>
    <tile gid="11"/>
@@ -167,7 +167,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="19"/>
-   <tile gid="44"/>
+   <tile gid="30"/>
    <tile gid="17"/>
    <tile gid="10"/>
    <tile gid="11"/>
@@ -617,4 +617,8 @@
    <tile gid="0"/>
   </data>
  </layer>
+ <objectgroup name="Objects" width="20" height="15">
+  <object name="Entrance" type="Entrance" x="0" y="204" width="17" height="38"/>
+  <object name="Exit" type="Exit" x="621" y="203" width="19" height="41"/>
+ </objectgroup>
 </map>

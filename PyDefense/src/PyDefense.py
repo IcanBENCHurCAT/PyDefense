@@ -47,8 +47,6 @@ towerInHand = None
 hoverTower = None
 selectedTower = -1
 
-
-
 run = True
 paused = True
 while run:
@@ -82,9 +80,11 @@ while run:
 			if (event.key == K_ESCAPE ):
 				selectedTower = -1
 				GUI.closeTowerMenu()
+				hoverTower = None
 			
 			if selectedTower <> -1:
 				towerInHand = None
+				GUI.closeTowerMenu()
 		
 		if (event.type == MOUSEBUTTONDOWN):
 			if towerInHand and GUI.money >= towerInHand.cost:
@@ -96,7 +96,7 @@ while run:
 		
 		#Capture the item hovering over
 		if(event.type == MOUSEMOTION):
-			if towerInHand is None:
+			if towerInHand is None and GUI.openTower is None:
 				hoverTower = drawMap.getTower(*pygame.mouse.get_pos())
 				
 	#End Events loop

@@ -13,6 +13,8 @@ class MapGUI(object):
 	selectedItem = ""
 	openTower = None
 	font = None
+	btnUpgrade = None
+	btnSell = None
 	
 	def __init__(self, width, height, font):
 		locale.setlocale( locale.LC_ALL, '' )
@@ -20,6 +22,8 @@ class MapGUI(object):
 		self.screenW = width
 		self.screenH = height
 		self.font = font
+		self.btnUpgrade = MapButton("Upgrade", font)
+		self.btnSell = MapButton("Sell", font)
 	
 	def setSelectedText(self, tower):
 		if self.openTower is None:
@@ -50,9 +54,53 @@ class MapGUI(object):
 		y = self.screenH - sizeY - 15
 		surface.blit(i, (x,y))
 		
-		#if self.openTower:
+		if self.openTower:
+			x = self.screenW - self.btnSell.width - 15
+			y = self.screenH - self.btnSell.height - 15
+			self.btnSell.render(surface, (x,y))
+			
+			x -= self.btnUpgrade.width + 10
+			self.btnUpgrade.render(surface, (x,y))
 			
 	
+class MapButton(object):
+	width = 0
+	height = 0
+	text = ""
+	font = None
+	surface = None
+	borderColor = (0,0,0)
+	borderWidth = 1
+	buttonScale = 1.5
+	buttonColor = (0,0,255)
+	buttonRect = None
+	transparency = 100
+	
+	def __init__(self, text, font):
+		self.font = font
+		self.text = text
+		width, height = self.font.size(text)
+		self.width = int(width * self.buttonScale)
+		self.height = int(height * self.buttonScale)
+		self.buttonRect = pygame.Rect(self.borderWidth,
+									self.borderWidth, 
+									self.width - (2 * self.borderWidth), 
+									self.height - (2 * self.borderWidth))
+		self.surface = pygame.Surface((self.width, self.height))
+		self.surface.fill(self.borderColor)
+		buttonSurface = pygame.Surface((self.buttonRect.width, self.buttonRect.height))
+		buttonSurface.fill(self.buttonColor)
+		self.surface.blit(buttonSurface, (self.borderWidth, self.borderWidth))
+		image = self.font.render(text, 1, (180,180,0))
+		x = (self.width / 2) - (width / 2)
+		y = (self.height / 2) - (height / 2)
+		self.surface.blit(image, (x,y))
+		self.surface.set_alpha(self.transparency)
+		
+	def render(self, surface, *coords):
+		surface.blit(self.surface, coords)
+		
+		
 class MapLoader(object):
 	'''
 	classdocs
