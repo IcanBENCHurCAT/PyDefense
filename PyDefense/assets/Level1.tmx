@@ -620,5 +620,8 @@
  <objectgroup name="Objects" width="20" height="15">
   <object name="Entrance" type="Entrance" x="0" y="204" width="17" height="38"/>
   <object name="Exit" type="Exit" x="621" y="203" width="19" height="41"/>
+  <object name="Path" type="Path" x="21" y="214">
+   <polyline points="-16,8 86,23 222,-6 374,27 525,-12 607,10"/>
+  </object>
  </objectgroup>
 </map>

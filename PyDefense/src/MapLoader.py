@@ -5,11 +5,13 @@ Created on Dec 3, 2013
 '''
 import pygame
 import locale
+import Enemies
 
 class MapGUI(object):
 	screenW = 0
 	screenH = 0
 	money = 0
+	health = 0
 	selectedItem = ""
 	openTower = None
 	font = None
@@ -19,6 +21,7 @@ class MapGUI(object):
 	def __init__(self, width, height, font):
 		locale.setlocale( locale.LC_ALL, '' )
 		self.money = 200
+		self.health = 100
 		self.screenW = width
 		self.screenH = height
 		self.font = font
@@ -36,6 +39,19 @@ class MapGUI(object):
 	def closeTowerMenu(self):
 		self.openTower = None
 	
+	def click(self, x, y, theMap):
+		if self.openTower:
+			rec = self.sellLoc()
+			if rec.collidepoint(x,y):
+				self.money += (self.openTower.cost * .80) #Needs 'upgrade cost' added in
+				theMap.removeTower(self.openTower)
+				self.closeTowerMenu()
+			rec = self.upgradeLoc()
+			if rec.collidepoint(x,y) and self.openTower.level < self.openTower.maxLevel and self.money >= self.openTower.upgradeCost:
+				self.money -= self.openTower.upgradeCost
+				self.openTower.upgrade()
+				self.closeTowerMenu()
+	
 	def render(self, surface):
 		#Print Money top-left
 		text = locale.currency( self.money, grouping=True )
@@ -44,7 +60,11 @@ class MapGUI(object):
 		sizeX, sizeY = self.font.size(text)
 		x = self.screenW - sizeX - 15
 		y = 15
-				
+		surface.blit(i, (x,y))
+		
+		text = "HP: {0}".format(self.health)
+		i = self.font.render(text, 1, (180, 180, 0))
+		x,y = (15,15)
 		surface.blit(i, (x,y))
 		
 		text = self.selectedItem
@@ -55,13 +75,26 @@ class MapGUI(object):
 		surface.blit(i, (x,y))
 		
 		if self.openTower:
-			x = self.screenW - self.btnSell.width - 15
-			y = self.screenH - self.btnSell.height - 15
-			self.btnSell.render(surface, (x,y))
+			rec = self.sellLoc()
+			self.btnSell.render(surface, (rec.x,rec.y))
 			
-			x -= self.btnUpgrade.width + 10
-			self.btnUpgrade.render(surface, (x,y))
+			rec = self.upgradeLoc()
+			self.btnUpgrade.render(surface, (rec.x,rec.y))
 			
+	def upgradeLoc(self):
+		rec = self.sellLoc()
+		rec.x -= self.btnUpgrade.width + 10
+		rec.width = self.btnUpgrade.width
+		rec.height = self.btnUpgrade.height
+		return rec
+	
+	def sellLoc(self):
+		x = self.screenW - self.btnSell.width - 15
+		y = self.screenH - self.btnSell.height - 15
+		rec = pygame.Rect(x, y, 
+						self.btnSell.width, 
+						self.btnSell.height)
+		return rec
 	
 class MapButton(object):
 	width = 0
@@ -110,12 +143,39 @@ class MapLoader(object):
 	enemyQueue = []
 	activeEnemies = []
 	enemyPath = []
+	entrance = None
+	exit = None
+	damage = 0
 
 	def __init__(self, filename):
 		import tmxloader
 		self.tiledmap = tmxloader.load_pygame(filename, pixelalpha=True)
-	
-	
+		for group in self.tiledmap.objectgroups:
+			for obj in group:
+				if obj.type == "Entrance":
+					self.entrance = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
+				elif obj.type == "Exit":
+					self.exit = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
+				elif obj.type == "Path":
+					points = obj.points
+					x = obj.x
+					y = obj.y
+					for pt in points:
+						newX,newY = pt
+						newX += x
+						newY += y
+						self.enemyPath.append((newX,newY))
+		
+		self.enemyQueue.append(Enemies.Sphere(self.enemyPath))
+
+	def update(self):
+		#Need to determine when to add new enemies
+		self.damage = 0
+		for enemy in self.enemyQueue:
+			if enemy.update() == True:
+				self.damage += enemy.damage
+				self.enemyQueue.remove(enemy)
+
 	def render(self, surface):
 		tw = self.tiledmap.tilewidth
 		th = self.tiledmap.tileheight
@@ -134,9 +194,12 @@ class MapLoader(object):
 							if layers[l].placeable == "true":
 								self.placeable.append(pygame.Rect(x*tw,y*th,tw,th))
 		
+		#Need to order items from lowest Y to highest Y and call render() on each of them
+		for enemy in self.enemyQueue:
+			enemy.render(surface)
+			
 		for tower in self.towers:
 			surface.blit(tower.getActiveImage(), tower.location)
-
 	
 	def getPlaceable(self, coords):
 		'''
@@ -160,5 +223,8 @@ class MapLoader(object):
 			
 	def placeTower(self, tower):
 		self.towers.append(tower)
+		
+	def removeTower(self, tower):
+		self.towers.remove(tower)
 		
 		
