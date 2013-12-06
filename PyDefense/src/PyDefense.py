@@ -51,6 +51,8 @@ run = True
 paused = True
 while run:
 	pygame.display.update()
+	if paused == False:
+		drawMap.update()
 	fpsClock.tick(30)
 	if paused == False:
 		windowSurfaceObj.fill(backgroundColor)
@@ -93,6 +95,8 @@ while run:
 				selectedTower = -1
 			elif hoverTower:
 				GUI.openTowerMenu(hoverTower)
+			x,y = pygame.mouse.get_pos()
+			GUI.click(x, y, drawMap)
 		
 		#Capture the item hovering over
 		if(event.type == MOUSEMOTION):

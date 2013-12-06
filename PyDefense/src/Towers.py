@@ -12,14 +12,15 @@ class Tower(object):
 	cost = 100
 	range = 1
 	upgradeCost = 20
+	maxLevel = 2
 	location = pygame.Rect(0,0,0,0)
 	collisionBox = pygame.Rect(0,0,0,0)
-	name = ""
 	scale = (64,64)
 	
 	def __init__(self, imagepaths):
 		for path in imagepaths:
 			self.image.append(pygame.image.load(path))
+		self.setName()
 			
 	def getActiveImage(self, Transparent=False):
 		surface = pygame.transform.scale(self.image[self.level -1], self.scale)
@@ -29,52 +30,59 @@ class Tower(object):
 	
 	def upgrade(self):
 		self.level += 1
+		self.setName()
 		
 	def setLocation(self, box):
 		self.collisionBox = box
 		self.location =  pygame.Rect(box.x - (box.width / 2), box.y - (box.height / 2), *self.scale)
+		
+	def setName(self):
+		self.name = "{0} Level {1}".format(self.className, self.level)
 			
 class FighterTower(Tower):
 	image = list()
+	name = ""
+	className = ""
 	def __init__(self):
 		paths = ["../assets/fighter.gif","../assets/fighter2.gif"]
-		super(FighterTower, self).__init__(paths)
 		self.damage = 2
 		self.delay = 2
-		self.name = "Fighter Level 1"
+		self.className = "Fighter"
+		super(FighterTower, self).__init__(paths)
 	
 	def upgrade(self):
 		self.damage += 2
-		self.name = "Fighter Level ", self.level
-		super(FighterTower, self).upgrade(self)
+		super(FighterTower, self).upgrade()
 		
 class ArcherTower(Tower):
 	image = list()
+	name = ""
+	className = ""
 	def __init__(self):
 		paths = ["../assets/archer.gif","../assets/archer2.gif"]
-		super(ArcherTower, self).__init__(paths)
 		self.damage = 1
 		self.delay = 1
 		self.range = 5
-		self.name = "Archer Level 1"
+		self.className = "Archer"
+		super(ArcherTower, self).__init__(paths)
 		
 	def upgrade(self):
 		self.delay -= 1
-		self.name = "Archer Level ", self.level
-		super(ArcherTower, self).upgrade(self)
+		super(ArcherTower, self).upgrade()
 		
 class MageTower(Tower):
 	image = list()
+	name = ""
+	className = ""
 	def __init__(self):
 		paths = ["../assets/mage.gif","../assets/mage2.gif"]
-		super(MageTower, self).__init__(paths)
 		self.damage = 3
 		self.delay = 3
 		self.range = 3
-		self.name = "Mage Level 1"
+		self.className = "Mage"
+		super(MageTower, self).__init__(paths)
 		
 	def upgrade(self):
 		self.damage += 1
 		self.range += 1
-		self.name = "Mage Level ", self.level
-		super(MageTower, self).upgrade(self)
+		super(MageTower, self).upgrade()
