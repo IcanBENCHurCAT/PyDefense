@@ -29,15 +29,17 @@ class MapGUI(object):
 		self.btnSell = MapButton("Sell", font)
 	
 	def setSelectedText(self, tower):
-		if self.openTower is None:
-			self.selectedItem = tower.name
+		self.selectedItem = tower.name
 		
 	def openTowerMenu(self, tower):
 		self.openTower = tower
 		self.setSelectedText(tower)
+		self.openTower.showRadius = True
 	
 	def closeTowerMenu(self):
-		self.openTower = None
+		if self.openTower:
+			self.openTower.showRadius = False
+			self.openTower = None
 	
 	def click(self, x, y, theMap):
 		if self.openTower:
@@ -166,16 +168,25 @@ class MapLoader(object):
 						newY += y
 						self.enemyPath.append((newX,newY))
 		
-		self.enemyQueue.append(Enemies.Sphere(self.enemyPath))
+		#TODO: append some enemies to the queue
+		#self.enemyQueue.append(Enemies.Sphere(self.enemyPath))
 
 	def update(self):
 		#Need to determine when to add new enemies
 		self.damage = 0
+		self.money = 0
 		for enemy in self.enemyQueue:
-			if enemy.update() == True:
+			ret = enemy.update()
+			if(type(ret) == int):
+				self.money += ret
+				self.enemyQueue.remove(enemy)
+			elif ret == True:
 				self.damage += enemy.damage
 				self.enemyQueue.remove(enemy)
-
+		
+		for tower in self.towers:
+			tower.update(self.enemyQueue)
+			
 	def render(self, surface):
 		tw = self.tiledmap.tilewidth
 		th = self.tiledmap.tileheight
@@ -199,7 +210,7 @@ class MapLoader(object):
 			enemy.render(surface)
 			
 		for tower in self.towers:
-			surface.blit(tower.getActiveImage(), tower.location)
+			tower.render(surface)
 	
 	def getPlaceable(self, coords):
 		'''
@@ -212,13 +223,13 @@ class MapLoader(object):
 			
 	def hasTower(self, box):
 		for tower in self.towers:
-			if box.colliderect(tower.collisionBox):
+			if box.colliderect(tower.collideBox):
 				return True
 		return False
 	
 	def getTower(self, x, y):
 		for tower in self.towers:
-			if tower.collisionBox.collidepoint(x,y):
+			if tower.collideBox.collidepoint(x,y):
 				return tower
 			
 	def placeTower(self, tower):

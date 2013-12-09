@@ -54,6 +54,7 @@ while run:
 	if paused == False:
 		drawMap.update()
 		GUI.health -= drawMap.damage
+		GUI.money += drawMap.money
 	fpsClock.tick(30)
 	if paused == False:
 		windowSurfaceObj.fill(backgroundColor)
@@ -93,15 +94,18 @@ while run:
 			if towerInHand and GUI.money >= towerInHand.cost:
 				drawMap.placeTower(towerInHand)
 				GUI.money -= towerInHand.cost
+				towerInHand.showRadius = False
 				selectedTower = -1
 			elif hoverTower:
+				if GUI.openTower:
+					GUI.closeTowerMenu()
 				GUI.openTowerMenu(hoverTower)
 			x,y = pygame.mouse.get_pos()
 			GUI.click(x, y, drawMap)
 		
 		#Capture the item hovering over
 		if(event.type == MOUSEMOTION):
-			if towerInHand is None and GUI.openTower is None:
+			if towerInHand is None:
 				hoverTower = drawMap.getTower(*pygame.mouse.get_pos())
 				
 	#End Events loop
@@ -115,9 +119,11 @@ while run:
 			else:
 				tower = towers[selectedTower]()
 				towerInHand = tower
+				towerInHand.showRadius = True
 			
 			tower.setLocation(box)
-			windowSurfaceObj.blit(tower.getActiveImage(Transparent=True), (tower.location.x,tower.location.y))
+			tower.render(windowSurfaceObj, Transparent=True)
+			#windowSurfaceObj.blit(tower.getActiveImage(Transparent=True), (tower.location.x,tower.location.y))
 			pygame.mouse.set_cursor(*pygame.cursors.arrow)
 		else:
 			pygame.mouse.set_cursor(*pygame.cursors.broken_x)
