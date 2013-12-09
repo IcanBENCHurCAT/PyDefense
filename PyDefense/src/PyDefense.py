@@ -74,7 +74,7 @@ while run:
 		#Using this for debugging currently. Shows that certain areas have been marked as 'placeable'
 		if (event.type == KEYDOWN ):
 			if (event.key == K_TAB):
-				drawMap.showPlaceable(windowSurfaceObj)
+				drawMap.addEnemy()
 			if (event.key == K_1):
 				selectedTower = 0
 			if (event.key == K_2):

@@ -52,10 +52,10 @@ class Tower(object):
 		self.target = None
 		x,y = (self.collideBox.x + self.collideBox.width / 2, 
 			self.collideBox.y + self.collideBox.height / 2)
-		for enemy in reversed(enemies):
+		for enemy in enemies:
 			xEnemy = enemy.collideBox.centerx
 			yEnemy = enemy.collideBox.centery
-			dist = math.hypot(x-xEnemy,y-yEnemy)
+			dist = math.hypot(x-xEnemy,y-yEnemy) - enemy.collideBox.width
 			if dist <= (self.range * self.distBase):
 				self.target = enemy
 				break
@@ -82,10 +82,11 @@ class FighterTower(Tower):
 	image = list()
 	name = ""
 	className = ""
+	animateAttack = False
 	def __init__(self):
 		paths = ["../assets/fighter.gif","../assets/fighter2.gif"]
 		self.damage = 2
-		self.delay = 2
+		self.delay = 20
 		self.className = "Fighter"
 		super(FighterTower, self).__init__(paths)
 	
@@ -93,14 +94,25 @@ class FighterTower(Tower):
 		self.damage += 2
 		super(FighterTower, self).upgrade()
 		
+	def attack(self):
+		self.animateAttack = True
+		super(FighterTower, self).attack()
+		
+	def render(self, surface, Transparent=False):
+		if self.animateAttack:
+			self.animateAttack = False
+			pygame.draw.ellipse(surface, (255,0,0), self.target.collideBox, 2)
+		super(FighterTower, self).render(surface, Transparent=Transparent)
+		
 class ArcherTower(Tower):
 	image = list()
 	name = ""
 	className = ""
+	animateAttack = False
 	def __init__(self):
 		paths = ["../assets/archer.gif","../assets/archer2.gif"]
 		self.damage = 1
-		self.delay = 1
+		self.delay = 20
 		self.range = 5
 		self.className = "Archer"
 		super(ArcherTower, self).__init__(paths)
@@ -109,14 +121,25 @@ class ArcherTower(Tower):
 		self.delay -= 1
 		super(ArcherTower, self).upgrade()
 		
+	def attack(self):
+		self.animateAttack = True
+		super(ArcherTower, self).attack()
+		
+	def render(self, surface, Transparent=False):
+		if self.animateAttack:
+			self.animateAttack = False
+			pygame.draw.ellipse(surface, (0,255,0), self.target.collideBox, 2)
+		super(ArcherTower, self).render(surface, Transparent=Transparent)
+		
 class MageTower(Tower):
 	image = list()
 	name = ""
 	className = ""
+	animateAttack = False
 	def __init__(self):
 		paths = ["../assets/mage.gif","../assets/mage2.gif"]
 		self.damage = 3
-		self.delay = 3
+		self.delay = 20
 		self.range = 3
 		self.className = "Mage"
 		super(MageTower, self).__init__(paths)
@@ -125,3 +148,13 @@ class MageTower(Tower):
 		self.damage += 1
 		self.range += 1
 		super(MageTower, self).upgrade()
+		
+	def attack(self):
+		self.animateAttack = True
+		super(MageTower, self).attack()
+		
+	def render(self, surface, Transparent=False):
+		if self.animateAttack:
+			self.animateAttack = False
+			pygame.draw.ellipse(surface, (0,0,255), self.target.collideBox, 2)
+		super(MageTower, self).render(surface, Transparent=Transparent)

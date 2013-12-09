@@ -169,7 +169,7 @@ class MapLoader(object):
 						self.enemyPath.append((newX,newY))
 		
 		#TODO: append some enemies to the queue
-		#self.enemyQueue.append(Enemies.Sphere(self.enemyPath))
+		self.enemyQueue.append(Enemies.Sphere(self.enemyPath))
 
 	def update(self):
 		#Need to determine when to add new enemies
@@ -237,5 +237,8 @@ class MapLoader(object):
 		
 	def removeTower(self, tower):
 		self.towers.remove(tower)
+		
+	def addEnemy(self):
+		self.enemyQueue.append(Enemies.Sphere(self.enemyPath))
 		
 		

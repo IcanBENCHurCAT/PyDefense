@@ -87,6 +87,8 @@ class Enemy(object):
 				self.target = self.getNextTarget()
 			
 			self.pathRemaining = self.getLengthRemaining()
+		
+		self.collideBox = pygame.Rect(self.position, self.currentFrame.get_size())
 		return False
 	
 	def render(self, surface):
