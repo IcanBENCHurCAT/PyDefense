@@ -101,7 +101,10 @@ class FighterTower(Tower):
 	def render(self, surface, Transparent=False):
 		if self.animateAttack:
 			self.animateAttack = False
-			pygame.draw.ellipse(surface, (255,0,0), self.target.collideBox, 2)
+			pygame.draw.ellipse(surface, (255,0,0), 
+							(self.target.collideBox.x, self.target.collideBox.y,
+							self.target.collideBox.width, self.collideBox.height), 
+							2)
 		super(FighterTower, self).render(surface, Transparent=Transparent)
 		
 class ArcherTower(Tower):
@@ -128,7 +131,10 @@ class ArcherTower(Tower):
 	def render(self, surface, Transparent=False):
 		if self.animateAttack:
 			self.animateAttack = False
-			pygame.draw.ellipse(surface, (0,255,0), self.target.collideBox, 2)
+			pygame.draw.ellipse(surface, (0,255,0), 
+							(self.target.collideBox.x, self.target.collideBox.y,
+							self.target.collideBox.width, self.collideBox.height),
+							 2)
 		super(ArcherTower, self).render(surface, Transparent=Transparent)
 		
 class MageTower(Tower):
@@ -156,5 +162,8 @@ class MageTower(Tower):
 	def render(self, surface, Transparent=False):
 		if self.animateAttack:
 			self.animateAttack = False
-			pygame.draw.ellipse(surface, (0,0,255), self.target.collideBox, 2)
+			pygame.draw.ellipse(surface, (0,0,255), 
+							(self.target.collideBox.x, self.target.collideBox.y,
+							self.target.collideBox.width, self.collideBox.height),
+							 2)
 		super(MageTower, self).render(surface, Transparent=Transparent)
