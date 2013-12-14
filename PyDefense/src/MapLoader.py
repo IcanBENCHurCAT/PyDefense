@@ -10,23 +10,22 @@ import Enemies
 class MapGUI(object):
 	screenW = 0
 	screenH = 0
-	money = 0
-	health = 0
 	selectedItem = ""
 	openTower = None
 	font = None
 	btnUpgrade = None
 	btnSell = None
 	
-	def __init__(self, width, height, font):
+	def __init__(self, width, height):
 		locale.setlocale( locale.LC_ALL, '' )
 		self.money = 200
 		self.health = 100
 		self.screenW = width
 		self.screenH = height
-		self.font = font
-		self.btnUpgrade = MapButton("Upgrade", font)
-		self.btnSell = MapButton("Sell", font)
+		pygame.font.init()
+		self.font = pygame.font.Font(pygame.font.get_default_font(), 20)
+		self.btnUpgrade = MapButton("Upgrade", self.font)
+		self.btnSell = MapButton("Sell", self.font)
 	
 	def setSelectedText(self, tower):
 		self.selectedItem = tower.name
@@ -45,12 +44,12 @@ class MapGUI(object):
 		if self.openTower:
 			rec = self.sellLoc()
 			if rec.collidepoint(x,y):
-				self.money += (self.openTower.cost * .80) #Needs 'upgrade cost' added in
+				theMap.money += (self.openTower.cost * .80) #Needs 'upgrade cost' added in
 				theMap.removeTower(self.openTower)
 				self.closeTowerMenu()
 			rec = self.upgradeLoc()
 			if rec.collidepoint(x,y) and self.openTower.level < self.openTower.maxLevel and self.money >= self.openTower.upgradeCost:
-				self.money -= self.openTower.upgradeCost
+				theMap.money -= self.openTower.upgradeCost
 				self.openTower.upgrade()
 				self.closeTowerMenu()
 	
@@ -147,7 +146,8 @@ class MapLoader(object):
 	enemyPath = []
 	entrance = None
 	exit = None
-	damage = 0
+	money = 200
+	health = 100
 
 	def __init__(self, filename):
 		import tmxloader
@@ -167,21 +167,33 @@ class MapLoader(object):
 						newX += x
 						newY += y
 						self.enemyPath.append((newX,newY))
+						
+		tw = self.tiledmap.tilewidth
+		th = self.tiledmap.tileheight
+		gt = self.tiledmap.getTileImage
+		layers = self.tiledmap.tilelayers
+		for l in xrange(0, len(self.tiledmap.tilelayers)):
+			for y in xrange(0, self.tiledmap.height):
+				for x in xrange(0, self.tiledmap.width):
+					if hasattr(layers[l],"placeable"):
+						if layers[l].placeable == "true":
+							tile = gt(x, y, l)
+							if tile: 
+								self.placeable.append(pygame.Rect(x*tw,y*th,tw,th))
+				
 		
 		#TODO: append some enemies to the queue
 		self.enemyQueue.append(Enemies.Sphere(self.enemyPath))
 
 	def update(self):
 		#Need to determine when to add new enemies
-		self.damage = 0
-		self.money = 0
 		for enemy in self.enemyQueue:
 			ret = enemy.update()
 			if(type(ret) == int):
 				self.money += ret
 				self.enemyQueue.remove(enemy)
 			elif ret == True:
-				self.damage += enemy.damage
+				self.health -= enemy.damage
 				self.enemyQueue.remove(enemy)
 		
 		for tower in self.towers:
@@ -192,18 +204,12 @@ class MapLoader(object):
 		th = self.tiledmap.tileheight
 		gt = self.tiledmap.getTileImage
 
-		layers = self.tiledmap.tilelayers
 		for l in xrange(0, len(self.tiledmap.tilelayers)):
 			for y in xrange(0, self.tiledmap.height):
 				for x in xrange(0, self.tiledmap.width):
 					tile = gt(x, y, l)
 					if tile: 
 						surface.blit(tile, (x*tw, y*th)) #add the tile to the image to be drawn
-						
-						#check for special attributes on the layer, tile, etc...
-						if hasattr(layers[l],"placeable"):
-							if layers[l].placeable == "true":
-								self.placeable.append(pygame.Rect(x*tw,y*th,tw,th))
 		
 		#Need to order items from lowest Y to highest Y and call render() on each of them
 		for enemy in self.enemyQueue:
