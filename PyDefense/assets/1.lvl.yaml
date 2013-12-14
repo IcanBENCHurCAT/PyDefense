@@ -1,0 +1,7 @@
+# level one data
+
+level:
+  description: Level 1
+  map: Level1.tmx
+  difficulty: easy
+
