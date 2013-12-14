@@ -55,7 +55,7 @@ class Tower(object):
 		for enemy in enemies:
 			xEnemy = enemy.collideBox.centerx
 			yEnemy = enemy.collideBox.centery
-			dist = math.hypot(x-xEnemy,y-yEnemy) - enemy.collideBox.width
+			dist = math.hypot(x-xEnemy,y-yEnemy) - enemy.collideBox.width / 2
 			if dist <= (self.range * self.distBase):
 				self.target = enemy
 				break

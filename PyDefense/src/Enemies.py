@@ -9,6 +9,7 @@ import math
 class Enemy(object):
 	collideBox = pygame.Rect(0,0,0,0)
 	position = (0,0)
+	floatPosition = (0.0,0.0)
 	health = 0
 	value = 0
 	armor = 0
@@ -24,6 +25,8 @@ class Enemy(object):
 		self.animation = sprites
 		self.path = path
 		self.position = self.path[0]
+		x,y = self.position
+		self.floatPosition = (float(x),float(y))
 		self.target = self.path[1]
 		
 		self.pathRemaining = self.getLengthRemaining()
@@ -69,20 +72,20 @@ class Enemy(object):
 		while self.distanceCounter > 1.0:
 			currSpeed += 1
 			self.distanceCounter -= 1
+		#if we should move at least one 'unit'
 		if currSpeed > 0:
-			newCoords = [self.position[0],self.position[1]]
-			for i in range(0,2):
-				if self.target[i] != newCoords[i]:
-					diff = self.target[i] - newCoords[i]
-					sign = 1
-					if diff < 0:
-						sign = -1
-	
-					if math.fabs(diff) < currSpeed:
-						newCoords[i] += sign * diff
-					else:
-						newCoords[i] += sign * currSpeed 
-			self.position = (newCoords[0],newCoords[1])
+			#Calculate a triangle with a hyp of 1
+			#Angle1 can be determined from inverse tan of the difference from self.position to self.target
+			#angle is in radians
+			sides = (self.target[0] - self.position[0], self.target[1] - self.position[1])
+			a,b = sides
+			angle1 = math.atan2(b, a)
+
+			rise = math.sin(angle1) * currSpeed
+			run = math.cos(angle1) * currSpeed
+			self.floatPosition = (self.floatPosition[0] + run, self.floatPosition[1] + rise)
+			self.position = (int(self.floatPosition[0]),int(self.floatPosition[1]))
+			
 			if self.target == self.position:
 				self.target = self.getNextTarget()
 			
@@ -102,7 +105,7 @@ class Sphere(Enemy):
 	
 	def __init__(self, path):
 		self.health = 20
-		self.speed = 5
+		self.speed = 2
 		self.damage = 10
 		self.value = 20
 		alpha = pygame.Surface((32,32))

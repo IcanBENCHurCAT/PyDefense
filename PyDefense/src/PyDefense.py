@@ -4,15 +4,15 @@ Created on Dec 3, 2013
 @author: gparker
 '''
 
-import pygame, sys
+import pygame
 
 from pygame.locals import *
 import MapLoader
 import Towers
 
 #Need to make this dynamic
-screenW = 640
-screenH = 480
+screenW = 1024
+screenH = 768
 
 pygame.init()
 pygame.font.init()
@@ -23,7 +23,7 @@ pygame.display.set_caption("PyDefense 0.1")
 backgroundColor = (255,255,255)
 #screen = pygame.Surface((screenW, screenH))
 
-drawMap = MapLoader.MapLoader("../assets/Level1.tmx")
+drawMap = MapLoader.MapLoader("../assets/Level2.tmx")
 drawMap.render(windowSurfaceObj)
 
 f = pygame.font.Font(pygame.font.get_default_font(), 20)
