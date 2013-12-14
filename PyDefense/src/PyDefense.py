@@ -5,7 +5,8 @@ Created on Dec 3, 2013
 '''
 
 import pygame
-
+import sys
+sys.path.append("../../pytmx")
 from pygame.locals import *
 import MapLoader
 import Towers
