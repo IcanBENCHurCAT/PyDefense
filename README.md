@@ -1,6 +1,7 @@
 PyDefense
 =========
 Tower defense game written in Python.
+Thanks to the pytmx project for the Tiled level-loader
 
 Version 0.1
 ===========
