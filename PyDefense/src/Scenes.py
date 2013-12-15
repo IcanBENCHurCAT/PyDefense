@@ -168,4 +168,4 @@ class TitleScene(Scene):
 	def handle_events(self, events):
 		for e in events:
 			if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
-				self.manager.go_to(LevelScene('2'))
+				self.manager.go_to(LevelScene('1'))
