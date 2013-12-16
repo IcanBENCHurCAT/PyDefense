@@ -16,6 +16,7 @@ class MapGUI(object):
 	btnUpgrade = None
 	btnSell = None
 	winning = False
+	losing = False
 	
 	def __init__(self, width, height):
 		locale.setlocale( locale.LC_ALL, '' )
@@ -83,8 +84,10 @@ class MapGUI(object):
 			rec = self.upgradeLoc()
 			self.btnUpgrade.render(surface, (rec.x,rec.y))
 		
-		if self.winning:
+		if self.winning or self.losing:
 			text = "Winning! Press Any Key to Move to the Next Level"
+			if self.losing:
+				text = "You suck again! Press Any Key to Restart the Level"
 			i = self.font.render(text, 1, (180, 180, 0))
 			sizeX, sizeY = self.font.size(text)
 			x,y = (self.screenW /2 - sizeX / 2, self.screenH / 2 - sizeY / 2)
@@ -160,6 +163,7 @@ class MapLoader(object):
 	enemyTimer = 0
 	enemyDelay = 90
 	winning = False
+	losing = False
 	finalwave = False
 
 	def __init__(self, filename):
@@ -218,6 +222,8 @@ class MapLoader(object):
 			elif ret == True:
 				self.health -= enemy.damage
 				self.activeEnemies.remove(enemy)
+				if(self.health <= 0):
+					self.losing = True
 		
 		for tower in self.towers:
 			tower.update(self.activeEnemies)

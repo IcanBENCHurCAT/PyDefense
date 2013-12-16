@@ -13,17 +13,23 @@ if __name__ == "__main__":
 	clock = pygame.time.Clock()
 
 	manager = SceneManager()
+	timeScalar = 1.0
 
 	""" start main loop """
 
 	game_over = False
 	while not game_over:
 
-		clock.tick(60)
+		clock.tick(60 * timeScalar)
 
 		if pygame.event.get(pygame.QUIT):
 			game_over = True
-			pass
+		
+		keys = pygame.key.get_pressed()
+		if(keys[K_SPACE]):
+			timeScalar = 2.0
+		else:
+			timeScalar = 1.0
 
 		manager.scene.handle_events(pygame.event.get())
 		manager.scene.update()

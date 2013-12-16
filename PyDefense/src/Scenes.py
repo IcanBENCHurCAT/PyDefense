@@ -91,6 +91,10 @@ class LevelScene(Scene):
 		if self.drawMap.winning:
 			self.GUI.winning = True
 			return
+		if self.drawMap.losing:
+			self.GUI.losing = True
+			return
+	
 		self.drawMap.update()
 		self.GUI.money = self.drawMap.money
 		self.GUI.health = self.drawMap.health
@@ -116,6 +120,8 @@ class LevelScene(Scene):
 			if (event.type == KEYDOWN ):
 				if self.drawMap.winning:
 					self.manager.go_to(LevelScene(str(self.currentLevel + 1)))
+				if self.drawMap.losing:
+					self.manager.go_to(LevelScene(str(self.currentLevel)))
 				if (event.key == K_TAB):
 					self.drawMap.sendNextWave()
 				if (event.key == K_1):
@@ -183,4 +189,4 @@ class TitleScene(Scene):
 	def handle_events(self, events):
 		for e in events:
 			if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
-				self.manager.go_to(LevelScene('3'))
+				self.manager.go_to(LevelScene('1'))
