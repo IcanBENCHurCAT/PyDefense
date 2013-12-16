@@ -1,6 +1,6 @@
 LICENSING INFORMATION:
 
-Mountain backdrop and spritesheet (grass, enemies)
+Grass and 'placeable' spritesheet - the grass sheet has been altered to include a full 'water' tile
 	http://opengameart.org/content/tower-defense-prototyping-assets-4-monsters-some-tiles-a-background-image
 
 Tower characters:

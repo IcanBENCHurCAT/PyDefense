@@ -1,0 +1,7 @@
+# level two data
+
+level:
+  description: Level 3
+  map: Level3.tmx
+  difficulty: easy
+  

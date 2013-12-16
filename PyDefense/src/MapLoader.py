@@ -15,6 +15,7 @@ class MapGUI(object):
 	font = None
 	btnUpgrade = None
 	btnSell = None
+	winning = False
 	
 	def __init__(self, width, height):
 		locale.setlocale( locale.LC_ALL, '' )
@@ -81,6 +82,13 @@ class MapGUI(object):
 			
 			rec = self.upgradeLoc()
 			self.btnUpgrade.render(surface, (rec.x,rec.y))
+		
+		if self.winning:
+			text = "Winning! Press Any Key to Move to the Next Level"
+			i = self.font.render(text, 1, (180, 180, 0))
+			sizeX, sizeY = self.font.size(text)
+			x,y = (self.screenW /2 - sizeX / 2, self.screenH / 2 - sizeY / 2)
+			surface.blit(i, (x,y))
 			
 	def upgradeLoc(self):
 		rec = self.sellLoc()
@@ -142,14 +150,25 @@ class MapLoader(object):
 	placeable = [] #list of placeable boxes
 	towers = []
 	enemyQueue = []
+	bufferedEnemies = []
 	activeEnemies = []
 	enemyPath = []
 	entrance = None
 	exit = None
 	money = 200
 	health = 100
+	enemyTimer = 0
+	enemyDelay = 90
+	winning = False
+	finalwave = False
 
 	def __init__(self, filename):
+		self.placeable = []
+		self.towers = []
+		self.enemyQueue = []
+		self.bufferedEnemies = []
+		self.activeEnemies = []
+		self.enemyPath = []
 		import tmxloader
 		self.tiledmap = tmxloader.load_pygame(filename, pixelalpha=True)
 		for group in self.tiledmap.objectgroups:
@@ -182,22 +201,29 @@ class MapLoader(object):
 								self.placeable.append(pygame.Rect(x*tw,y*th,tw,th))
 				
 		
-		#TODO: append some enemies to the queue
-		self.enemyQueue.append(Enemies.Sphere(self.enemyPath))
 
 	def update(self):
-		#Need to determine when to add new enemies
-		for enemy in self.enemyQueue:
+		
+		if (len(self.bufferedEnemies) > 0 and self.enemyTimer >= self.enemyDelay):
+			self.enemyTimer -= self.enemyDelay
+			self.activeEnemies.append(self.bufferedEnemies.pop())
+		
+		self.enemyTimer += 1
+		
+		for enemy in self.activeEnemies:
 			ret = enemy.update()
 			if(type(ret) == int):
 				self.money += ret
-				self.enemyQueue.remove(enemy)
+				self.activeEnemies.remove(enemy)
 			elif ret == True:
 				self.health -= enemy.damage
-				self.enemyQueue.remove(enemy)
+				self.activeEnemies.remove(enemy)
 		
 		for tower in self.towers:
-			tower.update(self.enemyQueue)
+			tower.update(self.activeEnemies)
+			
+		if self.finalwave and len(self.activeEnemies) == 0 and len(self.bufferedEnemies) == 0:
+			self.winning = True
 			
 	def render(self, surface):
 		tw = self.tiledmap.tilewidth
@@ -212,11 +238,18 @@ class MapLoader(object):
 						surface.blit(tile, (x*tw, y*th)) #add the tile to the image to be drawn
 		
 		#Need to order items from lowest Y to highest Y and call render() on each of them
-		for enemy in self.enemyQueue:
+		for enemy in self.activeEnemies:
 			enemy.render(surface)
 			
 		for tower in self.towers:
 			tower.render(surface)
+	
+	def buildEnemyQueue(self, enemy_list):
+		for enemy in enemy_list:
+			theClass = getattr(Enemies, enemy['class'])
+			theCount = enemy['count']
+			if theClass and theCount:
+				self.enemyQueue.append((theClass,theCount))
 	
 	def getPlaceable(self, coords):
 		'''
@@ -245,6 +278,18 @@ class MapLoader(object):
 		self.towers.remove(tower)
 		
 	def addEnemy(self):
-		self.enemyQueue.append(Enemies.Sphere(self.enemyPath))
+		self.activeEnemies.append(Enemies.Sphere(self.enemyPath))
+		
+	def sendNextWave(self):
+		if self.finalwave:
+			return
+		
+		if len(self.enemyQueue) == 1:
+			self.finalwave = True
+		enemy,count = self.enemyQueue.pop(0)
+		for i in range(0,count):
+			self.bufferedEnemies.append(enemy(self.enemyPath))
+		
+		self.enemyTimer = 0
 		
 		

@@ -5,3 +5,13 @@ level:
   map: Level2.tmx
   difficulty: easy
 
+enemies:
+  - 1:
+    class: "Sphere"
+    count: 10
+  - 2:
+    class: "Sphere"
+    count: 20
+  - 3:
+    class: "Sphere"
+    count: 40

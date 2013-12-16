@@ -52,6 +52,8 @@ class LevelScene(Scene):
 	towerInHand = None
 	hoverTower = None
 	selectedTower = -1
+	currentLevel = 0
+	
 	
 	def __init__(self, level_name):
 		super(LevelScene, self).__init__()
@@ -59,12 +61,19 @@ class LevelScene(Scene):
 		yaml_file = open(assets_path + level_name + '.lvl.yaml')
 		level_data = yaml.safe_load(yaml_file)
 		yaml_file.close()
+		self.currentLevel = int(level_name)
 
 		map_data = level_data.get('level')
+		enemy_list = level_data.get('enemies')
+		
 		self.drawMap = MapLoader.MapLoader(assets_path + map_data['map'])
+		if enemy_list:
+			self.drawMap.buildEnemyQueue(enemy_list)
+		
 		self.GUI = MapLoader.MapGUI(screenW, screenH)
 		
 	def render(self, screen):
+		screen.fill((255,255,255))
 		self.drawMap.render(screen)
 		self.GUI.render(screen)
 		
@@ -78,6 +87,10 @@ class LevelScene(Scene):
 			self.GUI.selectedItem = ""
 
 	def update(self):
+		
+		if self.drawMap.winning:
+			self.GUI.winning = True
+			return
 		self.drawMap.update()
 		self.GUI.money = self.drawMap.money
 		self.GUI.health = self.drawMap.health
@@ -101,8 +114,10 @@ class LevelScene(Scene):
 	def handle_events(self, events):
 		for event in events:
 			if (event.type == KEYDOWN ):
+				if self.drawMap.winning:
+					self.manager.go_to(LevelScene(str(self.currentLevel + 1)))
 				if (event.key == K_TAB):
-					self.drawMap.addEnemy()
+					self.drawMap.sendNextWave()
 				if (event.key == K_1):
 					self.selectedTower = 0
 				if (event.key == K_2):
@@ -168,4 +183,4 @@ class TitleScene(Scene):
 	def handle_events(self, events):
 		for e in events:
 			if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
-				self.manager.go_to(LevelScene('1'))
+				self.manager.go_to(LevelScene('3'))
