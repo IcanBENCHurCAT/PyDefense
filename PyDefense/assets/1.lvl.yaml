@@ -12,6 +12,10 @@ enemies:
   - 2:
     class: "Sphere"
     count: 20
+    health: 20
+    value: 20
   - 3:
     class: "Sphere"
-    count: 40
+    count: 30
+    health: 50
+    value: 50
