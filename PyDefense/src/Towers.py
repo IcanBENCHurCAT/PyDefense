@@ -5,6 +5,7 @@ Created on Dec 3, 2013
 '''
 import pygame
 import math
+from Animators import *
 
 class Tower(object):
 	level = 1
@@ -141,13 +142,13 @@ class MageTower(Tower):
 	image = list()
 	name = ""
 	className = ""
-	animateAttack = False
 	def __init__(self):
 		paths = ["../assets/mage.gif","../assets/mage2.gif"]
 		self.damage = 3
 		self.delay = 20
 		self.range = 3
 		self.className = "Mage"
+		self.animateAttack = list()
 		super(MageTower, self).__init__(paths)
 		
 	def upgrade(self):
@@ -156,14 +157,21 @@ class MageTower(Tower):
 		super(MageTower, self).upgrade()
 		
 	def attack(self):
-		self.animateAttack = True
+		#self.animateAttack = True
+		animation = FireballPhysics(self.collideBox.center, self.target)
+		self.animateAttack.append(animation)
 		super(MageTower, self).attack()
 		
+	def update(self, enemies):
+		for attack in self.animateAttack:
+			attack.update()
+			if attack.is_done:
+				self.animateAttack.remove(attack)
+		super(MageTower, self).update(enemies)
+			
 	def render(self, surface, Transparent=False):
-		if self.animateAttack:
-			self.animateAttack = False
-			pygame.draw.ellipse(surface, (0,0,255), 
-							(self.target.collideBox.x, self.target.collideBox.y,
-							self.target.collideBox.width, self.collideBox.height),
-							 2)
 		super(MageTower, self).render(surface, Transparent=Transparent)
+		
+		for attack in self.animateAttack:
+			attack.render(surface)
+		

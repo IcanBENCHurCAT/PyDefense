@@ -14,7 +14,6 @@ class Enemy(object):
 	value = 0
 	armor = 0
 	speed = 0 #how many updates before moving one pixel 
-	distanceCounter = 0.0
 	damage = 0
 	pathRemaining = 0
 	target = (0,0)
@@ -28,7 +27,7 @@ class Enemy(object):
 		x,y = self.position
 		self.floatPosition = (float(x),float(y))
 		self.target = self.path[1]
-		
+		self.distanceCounter = 0.0
 		self.pathRemaining = self.getLengthRemaining()
 		self.collideBox = pygame.Rect(self.position, self.currentFrame.get_size())
 
