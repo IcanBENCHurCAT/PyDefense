@@ -100,13 +100,24 @@ class Enemy(object):
 		surface.blit(self.currentFrame, (x - self.collideBox.width / 2, 
 										y - self.collideBox.width / 2))
 		
+	def applyBonuses(self, bonuses):
+		if 'health' in bonuses:
+			self.health += bonuses['health']
+		if 'armor' in bonuses:
+			self.armor += bonuses['armor'] #TODO: implement
+		if 'resist' in bonuses:
+			pass #TODO: implement
+		if 'speed' in bonuses:
+			self.speed /= bonuses['speed']
+		if 'value' in bonuses:
+			self.value += bonuses['value']
 class Sphere(Enemy):
 	
 	def __init__(self, path):
-		self.health = 20
-		self.speed = 2
+		self.health = 10
+		self.speed = 5
 		self.damage = 10
-		self.value = 20
+		self.value = 15
 		alpha = pygame.Surface((32,32))
 		#alpha.set_alpha(0)
 		surface = pygame.Surface((32,32))

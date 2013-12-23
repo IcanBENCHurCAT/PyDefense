@@ -254,8 +254,11 @@ class MapLoader(object):
 		for enemy in enemy_list:
 			theClass = getattr(Enemies, enemy['class'])
 			theCount = enemy['count']
+			bonuses = {}
+			if 'health' in enemy:
+				bonuses['health'] = enemy['health']
 			if theClass and theCount:
-				self.enemyQueue.append((theClass,theCount))
+				self.enemyQueue.append((theClass,theCount, bonuses))
 	
 	def getPlaceable(self, coords):
 		'''
@@ -292,9 +295,11 @@ class MapLoader(object):
 		
 		if len(self.enemyQueue) == 1:
 			self.finalwave = True
-		enemy,count = self.enemyQueue.pop(0)
+		enemy,count,bonuses = self.enemyQueue.pop(0)
 		for i in range(0,count):
-			self.bufferedEnemies.append(enemy(self.enemyPath))
+			e = enemy(self.enemyPath)
+			e.applyBonuses(bonuses)
+			self.bufferedEnemies.append(e)
 		
 		self.enemyTimer = 0
 		

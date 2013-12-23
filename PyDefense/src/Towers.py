@@ -15,7 +15,7 @@ class Tower(object):
 	cost = 100
 	range = 1 #multiplier for the distBase
 	distBase = 50 #base number of pixels for the range of the tower
-	upgradeCost = 20
+	upgradeCost = 50
 	maxLevel = 2
 	location = pygame.Rect(0,0,0,0) #where the tower appears to be
 	collideBox = pygame.Rect(0,0,0,0) #a 32x32 block of space the tower 'exists' in
@@ -36,7 +36,7 @@ class Tower(object):
 	
 	def drawRadius(self, surface):
 		pygame.draw.circle(surface, (0,255,255), (self.location.x + self.location.width / 2, 
-			self.location.y + self.location.height / 2), self.distBase * self.range, 2)
+			self.location.y + self.location.height / 2), int(self.distBase * self.range), 2)
 	
 	def upgrade(self):
 		self.level += 1
@@ -86,13 +86,15 @@ class FighterTower(Tower):
 	animateAttack = False
 	def __init__(self):
 		paths = ["../assets/fighter.gif","../assets/fighter2.gif"]
-		self.damage = 2
-		self.delay = 20
+		self.damage = 6
+		self.delay = 60
+		self.range = 1.5
 		self.className = "Fighter"
 		super(FighterTower, self).__init__(paths)
 	
 	def upgrade(self):
 		self.damage += 2
+		self.range = 1.69
 		super(FighterTower, self).upgrade()
 		
 	def attack(self):
@@ -116,13 +118,13 @@ class ArcherTower(Tower):
 	def __init__(self):
 		paths = ["../assets/archer.gif","../assets/archer2.gif"]
 		self.damage = 1
-		self.delay = 20
-		self.range = 5
+		self.delay = 30
+		self.range = 4
 		self.className = "Archer"
 		super(ArcherTower, self).__init__(paths)
 		
 	def upgrade(self):
-		self.delay -= 1
+		self.delay -= 10
 		super(ArcherTower, self).upgrade()
 		
 	def attack(self):
@@ -144,8 +146,8 @@ class MageTower(Tower):
 	className = ""
 	def __init__(self):
 		paths = ["../assets/mage.gif","../assets/mage2.gif"]
-		self.damage = 3
-		self.delay = 20
+		self.damage = 2
+		self.delay = 50
 		self.range = 3
 		self.className = "Mage"
 		self.animateAttack = list()
@@ -153,7 +155,6 @@ class MageTower(Tower):
 		
 	def upgrade(self):
 		self.damage += 1
-		self.range += 1
 		super(MageTower, self).upgrade()
 		
 	def attack(self):
