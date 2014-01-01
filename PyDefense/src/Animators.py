@@ -4,6 +4,7 @@ Created on Dec 22, 2013
 @author: gparker
 '''
 import pygame
+import math
 
 class SpriteAnimate(object):
 	
@@ -98,11 +99,20 @@ class Fireball(SpriteAnimate):
 class FireballPhysics(object):
 	
 	speed = 3
+	directions = {'left':math.pi, 
+				'up-left':(5.0 * math.pi / 4.0),
+				'up':(3.0 * math.pi / 2.0),
+				'up-right':(7.0 * math.pi / 4.0),
+				'right':0,
+				'down-right':(math.pi / 4.0),
+				'down':(math.pi / 2.0),
+				'down-left':(3.0 * math.pi / 4.0)}
 	
 	def __init__(self, start, target):
 		self.fireball = Fireball()
 		self.fireball.setAnimation('left')
 		self.current_position = start
+		self.float_position = (float(start[0]),float(start[1]))
 		self.destination = target
 		self.is_done = False
 
@@ -114,40 +124,36 @@ class FireballPhysics(object):
 		if self.destination.position == self.current_position:
 			self.is_done = True
 		
-		x,y = self.current_position
 		direction = ''
-		d1 = ''
-		d2 = ''
-		destX,destY = self.destination.position
-		distance = y - destY
-		velocity = self.speed if abs(distance) >= self.speed else abs(distance)
-		if distance > 0:
-			y -= velocity
-			d1 = 'up'
-		elif distance < 0:
-			y += velocity
-			d1 ='down'
 		
-		distance = x-destX
-		velocity = self.speed if abs(distance) >= self.speed else abs(distance)
-		if distance > 0:
-			x -= velocity
-			d2 = 'left'
-		elif distance < 0:
-			x += velocity
-			d2 = 'right'
+		sides = (self.destination.position[0] - self.current_position[0], self.destination.position[1] - self.current_position[1])
+		a,b = sides
+		angle1 = math.atan2(b, a)
+
+		rise = math.sin(angle1) * self.speed
+		run = math.cos(angle1) * self.speed
 		
-		if len(d1) and len(d2):
-			direction = str.format('{0}-{1}', d1, d2)
-		elif len(d1):
-			direction = d1
-		else:
-			direction = d2
+		self.float_position = (self.float_position[0] + run, self.float_position[1] + rise)
+		self.current_position = (int(self.float_position[0]),int(self.float_position[1]))
 		
+		dist = float("inf")
+		
+		if angle1 < 0:
+			angle1 = (2.0 * math.pi) + angle1
+			
+		for item in self.directions.items():
+			new_dist = abs(angle1 - item[1])
+			if new_dist < dist:
+				dist = new_dist
+				direction = item[0]
+				
+		
+		dist = (abs(self.current_position[0] - self.destination.position[0]), abs(self.current_position[1] - self.destination.position[1]))
+		if dist[0] <= self.speed and dist[1] <= self.speed:
+			self.current_position = self.destination.position
+			
 		self.fireball.setAnimation(direction)
 		
-			
-		self.current_position = (x,y)
 		self.fireball.update()
 	
 	def render(self, surface):

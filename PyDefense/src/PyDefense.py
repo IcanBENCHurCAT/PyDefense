@@ -29,7 +29,7 @@ if __name__ == "__main__":
 		
 		keys = pygame.key.get_pressed()
 		if(keys[K_SPACE]):
-			timeScaler = 2.0
+			timeScaler = 3.0
 		else:
 			timeScaler = 1.0
 

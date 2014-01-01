@@ -147,7 +147,7 @@ class MageTower(Tower):
 	def __init__(self):
 		paths = ["../assets/mage.gif","../assets/mage2.gif"]
 		self.damage = 2
-		self.delay = 50
+		self.delay = 150
 		self.range = 3
 		self.className = "Mage"
 		self.animateAttack = list()
