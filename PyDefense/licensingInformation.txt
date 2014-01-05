@@ -5,3 +5,12 @@ Grass and 'placeable' spritesheet - the grass sheet has been altered to include 
 
 Tower characters:
 	http://pousse.rapiere.free.fr/tome/
+
+Fireball:
+	http://opengameart.org/content/fireball-spell
+
+Arrow: (I edited this arrow to make it easier to animate)
+	http://z13.invisionfree.com/SMPAC/index.php?showtopic=1119
+
+Final Screen:
+	http://www.deviantart.com/morelikethis/299420745?view_mode=2

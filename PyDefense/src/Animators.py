@@ -71,18 +71,31 @@ class SpriteSheetHelper(object):
 			img_list.append(self.images[i][column])
 		return img_list
 	
+class Arrow(SpriteAnimate):
+	image = pygame.image.load('../assets/arrow.png')
+	def __init__(self):
+		helper = SpriteSheetHelper(self.image, 8, 1)
+		self.animations = {'left' : helper.getRow(0), 
+					'up-left' : helper.getRow(1),
+					'up' : helper.getRow(2),
+					'up-right' : helper.getRow(3),
+					'right' : helper.getRow(4),
+					'down-right' : helper.getRow(5),
+					'down' : helper.getRow(6),
+					'down-left' : helper.getRow(7)}
+		super(Arrow, self).__init__(self.animations)
+	
 class Fireball(SpriteAnimate):
 	''''
-	0 = left 		PI
-	1 = up-left 	3PI/4
-	2 = up 			PI/2
-	3 = up-right 	PI/4
-	4 = right 		0PI
-	5 = down-right	7PI/4
-	6 = down 		3PI/2
-	7 = down-left 	5PI/4
-	''' 
-	animations = dict()
+	0 = left
+	1 = up-left
+	2 = up
+	3 = up-right
+	4 = right
+	5 = down-right
+	6 = down
+	7 = down-left
+	'''
 	image = pygame.image.load('../assets/fireball.png')
 	def __init__(self):
 		helper = SpriteSheetHelper(self.image, 8, 8)
@@ -96,9 +109,8 @@ class Fireball(SpriteAnimate):
 					'down-left' : helper.getRow(7)}
 		super(Fireball, self).__init__(self.animations)
 	
-class FireballPhysics(object):
+class ProjectilePhysics(object):
 	
-	speed = 3
 	directions = {'left':math.pi, 
 				'up-left':(5.0 * math.pi / 4.0),
 				'up':(3.0 * math.pi / 2.0),
@@ -109,13 +121,10 @@ class FireballPhysics(object):
 				'down-left':(3.0 * math.pi / 4.0)}
 	
 	def __init__(self, start, target):
-		self.fireball = Fireball()
-		self.fireball.setAnimation('left')
 		self.current_position = start
 		self.float_position = (float(start[0]),float(start[1]))
 		self.destination = target
 		self.is_done = False
-
 	
 	def update(self):
 		if self.is_done == True:
@@ -152,12 +161,29 @@ class FireballPhysics(object):
 		if dist[0] <= self.speed and dist[1] <= self.speed:
 			self.current_position = self.destination.position
 			
-		self.fireball.setAnimation(direction)
+		self.animation.setAnimation(direction)
 		
-		self.fireball.update()
+		self.animation.update()
 	
 	def render(self, surface):
-		draw_position = (self.current_position[0] - self.fireball.current_frame.width / 2,
-						self.current_position[1] - self.fireball.current_frame.height / 2)
-		self.fireball.render(surface, draw_position)
+		draw_position = (self.current_position[0] - self.animation.current_frame.width / 2,
+						self.current_position[1] - self.animation.current_frame.height / 2)
+		self.animation.render(surface, draw_position)
+	
+class FireballPhysics(ProjectilePhysics):
+	
+	speed = 3
+	
+	def __init__(self, start, target):
+		self.animation = Fireball()
+		self.animation.setAnimation('left')
+		super(FireballPhysics, self).__init__(start, target)
+		
+class ArrowPhysics(ProjectilePhysics):
+	speed = 5
+	
+	def __init__(self, start, target):
+		self.animation = Arrow()
+		self.animation.setAnimation('left')
+		super(ArrowPhysics, self).__init__(start, target)
 	
