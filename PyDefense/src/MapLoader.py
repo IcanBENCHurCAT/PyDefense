@@ -6,6 +6,8 @@ Created on Dec 3, 2013
 import pygame
 import locale
 import Enemies
+from Enemies import Sphere
+from Towers import ArcherTower
 
 class MapGUI(object):
 	screenW = 0
@@ -244,11 +246,17 @@ class MapLoader(object):
 						surface.blit(tile, (x*tw, y*th)) #add the tile to the image to be drawn
 		
 		#Need to order items from lowest Y to highest Y and call render() on each of them
+		drawable = list()
 		for enemy in self.activeEnemies:
-			enemy.render(surface)
+			drawable.append(enemy)
+			#enemy.render(surface)
 			
 		for tower in self.towers:
-			tower.render(surface)
+			drawable.append(tower)
+			#tower.render(surface)
+		
+		for item in sorted(drawable, key=lambda item: item.collideBox.y):
+			item.render(surface)
 	
 	def buildEnemyQueue(self, enemy_list):
 		for enemy in enemy_list:
