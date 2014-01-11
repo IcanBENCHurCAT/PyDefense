@@ -7,11 +7,11 @@ level:
 
 enemies:
   - 1:
-    class: "Sphere"
+    class: "Zombie"
     count: 10
   - 2:
-    class: "Sphere"
+    class: "Zombie"
     count: 20
   - 3:
-    class: "Sphere"
+    class: "Zombie"
     count: 40

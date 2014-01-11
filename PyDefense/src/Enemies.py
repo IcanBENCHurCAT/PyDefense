@@ -5,8 +5,9 @@ Created on Dec 5, 2013
 '''
 import pygame
 import math
+from Animators import *
 
-class Enemy(object):
+class Enemy(SpriteAnimate):
 	collideBox = pygame.Rect(0,0,0,0)
 	position = (0,0)
 	floatPosition = (0.0,0.0)
@@ -17,11 +18,8 @@ class Enemy(object):
 	damage = 0
 	pathRemaining = 0
 	target = (0,0)
-	animation = None
-	currentFrame = None
 	path = list()
-	def __init__(self, sprites, path):
-		self.animation = sprites
+	def __init__(self, path, full_animation):
 		self.path = path
 		self.position = self.path[0]
 		x,y = self.position
@@ -29,7 +27,9 @@ class Enemy(object):
 		self.target = self.path[1]
 		self.distanceCounter = 0.0
 		self.pathRemaining = self.getLengthRemaining()
-		self.collideBox = pygame.Rect(self.position, self.currentFrame.get_size())
+		super(Enemy,self).__init__(full_animation)
+		self.collideBox = pygame.Rect(x,y,*(self.current_frame.size))
+		self.update_delay = 25
 
 	def getNextTarget(self):
 		currNode = self.path.index(self.target)
@@ -87,18 +87,33 @@ class Enemy(object):
 			
 			if self.target == self.position:
 				self.target = self.getNextTarget()
+				
+			if(abs(rise) > abs(run)):
+				#up-down
+				if(rise < 0):
+					self.setAnimation('up')
+				else:
+					self.setAnimation('down')
+			else:
+				#left-right
+				if(run < 0):
+					self.setAnimation('left')
+				else:
+					self.setAnimation('right')
 			
 			self.pathRemaining = self.getLengthRemaining()
-		width,height = self.currentFrame.get_size()
+			
+		width,height = self.current_frame.size
 		x,y = self.position
 		self.collideBox = pygame.Rect((x - width / 2, y - height / 2), 
 									(width,height))
+		super(Enemy,self).update()
 		return False
 	
-	def render(self, surface):
-		x,y = self.position
-		surface.blit(self.currentFrame, (x - self.collideBox.width / 2, 
-										y - self.collideBox.width / 2))
+# 	def render(self, surface):
+# 		x,y = self.position
+# 		surface.blit(self.currentFrame, (x - self.collideBox.width / 2, 
+# 										y - self.collideBox.width / 2))
 		
 	def applyBonuses(self, bonuses):
 		if 'health' in bonuses:
@@ -111,23 +126,56 @@ class Enemy(object):
 			self.speed /= bonuses['speed']
 		if 'value' in bonuses:
 			self.value += bonuses['value']
-class Sphere(Enemy):
+# class Sphere(Enemy):
+# 	
+# 	def __init__(self, path):
+# 		self.health = 10
+# 		self.speed = 5
+# 		self.damage = 10
+# 		self.value = 15
+# 		surface = pygame.Surface((32,32))
+# 		pygame.draw.circle(surface, (0,0,255), (16,16), 16) #these 16's need to be pulled from the surface object
+# 		self.currentFrame = surface
+# 		super(Sphere, self).__init__(path)
+# 	
+# 	def render(self, surface):
+# 		x,y = self.position
+# 		surface.blit(self.currentFrame, (x - self.collideBox.width / 2, 
+# 										y - self.collideBox.width / 2))
+		
+class Skeleton(Enemy):
+	image = pygame.image.load('../assets/zombie_n_skeleton2.png')
 	
 	def __init__(self, path):
 		self.health = 10
 		self.speed = 5
 		self.damage = 10
 		self.value = 15
-		alpha = pygame.Surface((32,32))
-		#alpha.set_alpha(0)
-		surface = pygame.Surface((32,32))
-		pygame.draw.circle(surface, (0,0,255), (16,16), 16) #these 16's need to be pulled from the surface object
-		alpha.blit(surface, (0,0))
-		self.currentFrame = surface
-		sprites = list()
-		sprites.append(alpha)
-		super(Sphere, self).__init__(sprites, path)
-	
+		helper = SpriteSheetHelper(self.image, 4, 9 )
+		self.animations = {'down' : helper.getRow(0,(3,5)), 
+					'left' : helper.getRow(1,(3,5)),
+					'right' : helper.getRow(2, (3,5)),
+					'up' : helper.getRow(3,(3,5))}
+		super(Skeleton, self).__init__(path, self.animations)
+		
 	def render(self, surface):
-		super(Sphere, self).render(surface)
+		super(Skeleton, self).render(surface, self.collideBox.topleft)
+		
+class Zombie(Enemy, SpriteAnimate):
+	image = pygame.image.load('../assets/zombie_n_skeleton2.png')
+	
+	def __init__(self, path):
+		self.health = 10
+		self.speed = 5
+		self.damage = 10
+		self.value = 15
+		helper = SpriteSheetHelper(self.image, 4, 9 )
+		self.animations = {'down' : helper.getRow(0,(0,2)), 
+					'left' : helper.getRow(1,(0,2)),
+					'right' : helper.getRow(2, (0,2)),
+					'up' : helper.getRow(3,(0,2))}
+		super(Zombie, self).__init__(path=path, full_animation=self.animations)
+		
+	def render(self, surface):
+		super(Zombie, self).render(surface, self.collideBox.topleft)
 		

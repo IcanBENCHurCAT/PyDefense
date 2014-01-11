@@ -14,3 +14,9 @@ Arrow: (I edited this arrow to make it easier to animate)
 
 Final Screen:
 	http://www.deviantart.com/morelikethis/299420745?view_mode=2
+	
+Enemies:
+	http://opengameart.org/content/tower-defense-prototyping-assets-4-monsters-some-tiles-a-background-image
+	http://opengameart.org/content/lpc-wolf-animation
+	http://opengameart.org/content/giant-spider-32x32
+	http://opengameart.org/content/zombie-and-skeleton-32x48

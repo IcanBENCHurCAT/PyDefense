@@ -43,7 +43,18 @@ class SpriteAnimate(object):
 				self.current_frame = self.current_animation[0]
 	
 	def render(self,surface, position):
-		surface.blit(self.image, position, self.current_frame)
+		f = self.current_frame
+		s = pygame.Surface((f.width, f.height),pygame.SRCALPHA, 32)
+		s.blit(self.image, (0,0), f)
+		if(hasattr(self,'rotation')):
+			loc = s.get_rect().center
+			s = pygame.transform.rotate(s, math.degrees(-1 *self.rotation))
+			s.get_rect().center = loc
+			
+		surface.blit(s, position)
+		
+	def setRotation(self, radians):
+		self.rotation = radians
 
 class SpriteSheetHelper(object):
 	
@@ -62,7 +73,9 @@ class SpriteSheetHelper(object):
 # 				crop.blit(image, (0,0), area = (j*width,i*height,width,height))
 				self.images[i][j] = pygame.Rect((j*width,i*height,width,height))
 		
-	def getRow(self,row):
+	def getRow(self,row, subset=None):
+		if(subset):
+			return self.images[row][subset[0]:subset[1]]
 		return self.images[row]
 	
 	def getColumn(self,column):
@@ -125,6 +138,7 @@ class ProjectilePhysics(object):
 		self.float_position = (float(start[0]),float(start[1]))
 		self.destination = target
 		self.is_done = False
+		self.current_direction = 0
 	
 	def update(self):
 		if self.is_done == True:
@@ -155,6 +169,7 @@ class ProjectilePhysics(object):
 			if new_dist < dist:
 				dist = new_dist
 				direction = item[0]
+				self.current_direction = item[1]
 				
 		
 		dist = (abs(self.current_position[0] - self.destination.position[0]), abs(self.current_position[1] - self.destination.position[1]))
@@ -186,4 +201,24 @@ class ArrowPhysics(ProjectilePhysics):
 		self.animation = Arrow()
 		self.animation.setAnimation('left')
 		super(ArrowPhysics, self).__init__(start, target)
+		
+class Sword(SpriteAnimate):
+	image = pygame.image.load('../assets/fighterAttack.png')
+	
+	def __init__(self):
+		helper = SpriteSheetHelper(self.image, 1, 5)
+		self.animations = {'attack':helper.getRow(0)}
+		super(Sword, self).__init__(self.animations)
+
+class SwordPhysics(ProjectilePhysics):
+	speed = 3
+	
+	def __init__(self, start, target):
+		self.animation = Sword()
+		self.animation.setAnimation('attack')
+		super(SwordPhysics,self).__init__(start, target)
+		
+	def update(self):
+		super(SwordPhysics, self).update()
+		self.animation.setRotation(self.current_direction)
 	

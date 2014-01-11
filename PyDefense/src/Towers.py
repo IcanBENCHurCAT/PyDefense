@@ -83,13 +83,13 @@ class FighterTower(Tower):
 	image = list()
 	name = ""
 	className = ""
-	animateAttack = False
 	def __init__(self):
 		paths = ["../assets/fighter.gif","../assets/fighter2.gif"]
 		self.damage = 6
 		self.delay = 60
 		self.range = 1.5
 		self.className = "Fighter"
+		self.animateAttack = list()
 		super(FighterTower, self).__init__(paths)
 	
 	def upgrade(self):
@@ -98,18 +98,22 @@ class FighterTower(Tower):
 		super(FighterTower, self).upgrade()
 		
 	def attack(self):
-		self.animateAttack = True
+		animation = SwordPhysics(self.collideBox.center, self.target)
+		self.animateAttack.append(animation)
 		super(FighterTower, self).attack()
 		
-	def render(self, surface, Transparent=False):
-		if self.animateAttack:
-			self.animateAttack = False
-			pygame.draw.ellipse(surface, (255,0,0), 
-							(self.target.collideBox.x, self.target.collideBox.y,
-							self.target.collideBox.width, self.collideBox.height), 
-							2)
-		super(FighterTower, self).render(surface, Transparent=Transparent)
+	def update(self, enemies):
+		for attack in self.animateAttack:
+			attack.update()
+			if attack.is_done:
+				self.animateAttack.remove(attack)
+		super(FighterTower, self).update(enemies)
 		
+	def render(self, surface, Transparent=False):
+		super(FighterTower, self).render(surface, Transparent=Transparent)
+		for attack in self.animateAttack:
+			attack.render(surface)
+			
 class ArcherTower(Tower):
 	image = list()
 	name = ""

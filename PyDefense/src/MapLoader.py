@@ -6,8 +6,7 @@ Created on Dec 3, 2013
 import pygame
 import locale
 import Enemies
-from Enemies import Sphere
-from Towers import ArcherTower
+import random
 
 class MapGUI(object):
 	screenW = 0
@@ -163,7 +162,7 @@ class MapLoader(object):
 	money = 200
 	health = 100
 	enemyTimer = 0
-	enemyDelay = 90
+	delay_max = 200
 	winning = False
 	losing = False
 	finalwave = False
@@ -205,14 +204,16 @@ class MapLoader(object):
 							tile = gt(x, y, l)
 							if tile: 
 								self.placeable.append(pygame.Rect(x*tw,y*th,tw,th))
-				
+		
+		self.enemy_delay = self.delay_max
 		
 
 	def update(self):
 		
-		if (len(self.bufferedEnemies) > 0 and self.enemyTimer >= self.enemyDelay):
-			self.enemyTimer -= self.enemyDelay
+		if (len(self.bufferedEnemies) > 0 and self.enemyTimer >= self.enemy_delay):
+			self.enemyTimer -= self.enemy_delay
 			self.activeEnemies.append(self.bufferedEnemies.pop())
+			self.enemy_delay = random.randint(50,self.delay_max)
 		
 		self.enemyTimer += 1
 		
@@ -294,8 +295,8 @@ class MapLoader(object):
 	def removeTower(self, tower):
 		self.towers.remove(tower)
 		
-	def addEnemy(self):
-		self.activeEnemies.append(Enemies.Sphere(self.enemyPath))
+	#def addEnemy(self):
+		#self.activeEnemies.append(Enemies.Sphere(self.enemyPath))
 		
 	def sendNextWave(self):
 		if self.finalwave:
