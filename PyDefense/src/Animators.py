@@ -88,14 +88,15 @@ class Arrow(SpriteAnimate):
 	image = pygame.image.load('../assets/arrow.png')
 	def __init__(self):
 		helper = SpriteSheetHelper(self.image, 8, 1)
-		self.animations = {'left' : helper.getRow(0), 
-					'up-left' : helper.getRow(1),
-					'up' : helper.getRow(2),
-					'up-right' : helper.getRow(3),
-					'right' : helper.getRow(4),
-					'down-right' : helper.getRow(5),
-					'down' : helper.getRow(6),
-					'down-left' : helper.getRow(7)}
+# 		self.animations = {'left' : helper.getRow(0), 
+# 					'up-left' : helper.getRow(1),
+# 					'up' : helper.getRow(2),
+# 					'up-right' : helper.getRow(3),
+# 					'right' : helper.getRow(4),
+# 					'down-right' : helper.getRow(5),
+# 					'down' : helper.getRow(6),
+# 					'down-left' : helper.getRow(7)}
+		self.animations = {'attack' : helper.getRow(4)}
 		super(Arrow, self).__init__(self.animations)
 	
 class Fireball(SpriteAnimate):
@@ -112,14 +113,15 @@ class Fireball(SpriteAnimate):
 	image = pygame.image.load('../assets/fireball.png')
 	def __init__(self):
 		helper = SpriteSheetHelper(self.image, 8, 8)
-		self.animations = {'left' : helper.getRow(0), 
-					'up-left' : helper.getRow(1),
-					'up' : helper.getRow(2),
-					'up-right' : helper.getRow(3),
-					'right' : helper.getRow(4),
-					'down-right' : helper.getRow(5),
-					'down' : helper.getRow(6),
-					'down-left' : helper.getRow(7)}
+# 		self.animations = {'left' : helper.getRow(0), 
+# 					'up-left' : helper.getRow(1),
+# 					'up' : helper.getRow(2),
+# 					'up-right' : helper.getRow(3),
+# 					'right' : helper.getRow(4),
+# 					'down-right' : helper.getRow(5),
+# 					'down' : helper.getRow(6),
+# 					'down-left' : helper.getRow(7)}
+		self.animations = {'attack' : helper.getRow(4)}
 		super(Fireball, self).__init__(self.animations)
 	
 class ProjectilePhysics(object):
@@ -169,12 +171,12 @@ class ProjectilePhysics(object):
 			if new_dist < dist:
 				dist = new_dist
 				direction = item[0]
-				self.current_direction = item[1]
+				self.current_direction = angle1
 				
 		
 		dist = (abs(self.current_position[0] - self.destination.position[0]), abs(self.current_position[1] - self.destination.position[1]))
-		if dist[0] <= self.speed and dist[1] <= self.speed:
-			self.current_position = self.destination.position
+		if dist[0] <= self.speed * 5 and dist[1] <= self.speed * 5:
+			self.is_done = True
 			
 		self.animation.setAnimation(direction)
 		
@@ -191,16 +193,24 @@ class FireballPhysics(ProjectilePhysics):
 	
 	def __init__(self, start, target):
 		self.animation = Fireball()
-		self.animation.setAnimation('left')
+		self.animation.setAnimation('attack')
 		super(FireballPhysics, self).__init__(start, target)
+		
+	def update(self):
+		super(FireballPhysics, self).update()
+		self.animation.setRotation(self.current_direction)
 		
 class ArrowPhysics(ProjectilePhysics):
 	speed = 5
 	
 	def __init__(self, start, target):
 		self.animation = Arrow()
-		self.animation.setAnimation('left')
+		self.animation.setAnimation('attack')
 		super(ArrowPhysics, self).__init__(start, target)
+		
+	def update(self):
+		super(ArrowPhysics, self).update()
+		self.animation.setRotation(self.current_direction)
 		
 class Sword(SpriteAnimate):
 	image = pygame.image.load('../assets/fighterAttack.png')

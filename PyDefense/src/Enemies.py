@@ -126,23 +126,7 @@ class Enemy(SpriteAnimate):
 			self.speed /= bonuses['speed']
 		if 'value' in bonuses:
 			self.value += bonuses['value']
-# class Sphere(Enemy):
-# 	
-# 	def __init__(self, path):
-# 		self.health = 10
-# 		self.speed = 5
-# 		self.damage = 10
-# 		self.value = 15
-# 		surface = pygame.Surface((32,32))
-# 		pygame.draw.circle(surface, (0,0,255), (16,16), 16) #these 16's need to be pulled from the surface object
-# 		self.currentFrame = surface
-# 		super(Sphere, self).__init__(path)
-# 	
-# 	def render(self, surface):
-# 		x,y = self.position
-# 		surface.blit(self.currentFrame, (x - self.collideBox.width / 2, 
-# 										y - self.collideBox.width / 2))
-		
+
 class Skeleton(Enemy):
 	image = pygame.image.load('../assets/zombie_n_skeleton2.png')
 	
@@ -161,7 +145,7 @@ class Skeleton(Enemy):
 	def render(self, surface):
 		super(Skeleton, self).render(surface, self.collideBox.topleft)
 		
-class Zombie(Enemy, SpriteAnimate):
+class Zombie(Enemy):
 	image = pygame.image.load('../assets/zombie_n_skeleton2.png')
 	
 	def __init__(self, path):
@@ -178,4 +162,68 @@ class Zombie(Enemy, SpriteAnimate):
 		
 	def render(self, surface):
 		super(Zombie, self).render(surface, self.collideBox.topleft)
+
+class Spider(Enemy):
+	image = pygame.image.load('../assets/spider_4.png')
+	
+	def __init__(self, path):
+		self.health = 10
+		self.speed = 5
+		self.damage = 10
+		self.value = 15
+		helper = SpriteSheetHelper(self.image, 4, 7)
+		self.animations = {'down' : helper.getRow(0,(0,5)), 
+					'left' : helper.getRow(1,(0,5)),
+					'right' : helper.getRow(2,(0,5)),
+					'up' : helper.getRow(3,(0,5))}
+		super(Spider, self).__init__(path=path, full_animation=self.animations)
+		
+	def render(self, surface):
+		super(Spider, self).render(surface, self.collideBox.topleft)
+
+class Wolf(Enemy):
+	image = pygame.image.load('../assets/wolfsheet.png')
+	
+	def __init__(self, path):
+		self.health = 10
+		self.speed = 2
+		self.damage = 10
+		self.value = 15
+		helper = SpriteSheetHelper(self.image, 4, 5 )
+		self.animations = {'down' : helper.getRow(0), 
+					'left' : helper.getRow(1),
+					'right' : helper.getRow(2),
+					'up' : helper.getRow(3)}
+		super(Wolf, self).__init__(path=path, full_animation=self.animations)
+		self.update_delay = 15
+	def render(self, surface):
+		super(Wolf, self).render(surface, self.collideBox.topleft)
+		
+class Crow(Enemy):
+	image = pygame.image.load('../assets/crow.png')
+	
+	def __init__(self, path):
+		self.health = 10
+		self.speed = 5
+		self.damage = 10
+		self.value = 15
+		self.flying = True
+		self.last_x = 0
+		helper = SpriteSheetHelper(self.image, 2, 5 )
+		self.animations = {'right' : helper.getRow(0), 
+					'left' : helper.getRow(1)}
+		super(Crow, self).__init__(path=path, full_animation=self.animations)
+		self.update_delay = 15
+	def render(self, surface):
+		super(Crow, self).render(surface, self.collideBox.topleft)
+		
+	def update(self):
+		ret = super(Crow, self).update()
+		if self.last_x <> self.collideBox.x:
+			if self.last_x < self.collideBox.x:
+				self.setAnimation('right')
+			else:
+				self.setAnimation('left')
+			self.last_x = self.collideBox.x
+		return ret
 		

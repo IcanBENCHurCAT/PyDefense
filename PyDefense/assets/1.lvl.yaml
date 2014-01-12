@@ -7,7 +7,7 @@ level:
 
 enemies:
   - 1:
-    class: "Skeleton"
+    class: "Crow"
     count: 10
   - 2:
     class: "Zombie"
