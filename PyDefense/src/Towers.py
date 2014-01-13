@@ -54,6 +54,9 @@ class Tower(object):
 		x,y = (self.collideBox.x + self.collideBox.width / 2, 
 			self.collideBox.y + self.collideBox.height / 2)
 		for enemy in enemies:
+			if hasattr(enemy, 'flying'):
+				if self.__class__ == FighterTower:
+					continue
 			xEnemy = enemy.collideBox.centerx
 			yEnemy = enemy.collideBox.centery
 			dist = math.hypot(x-xEnemy,y-yEnemy) - enemy.collideBox.width / 2
@@ -176,6 +179,12 @@ class MageTower(Tower):
 			attack.update()
 			if attack.is_done:
 				self.animateAttack.remove(attack)
+				#deal splash damage
+				for enemy in enemies:
+					x,y = (self.collideBox.centerx, self.collideBox.centery)
+					dist = math.hypot(x-enemy.collideBox.centerx,y-enemy.collideBox.centery) - enemy.collideBox.width / 2
+					if dist < attack.animation.current_frame.width * 2:
+						enemy.attack(self.damage / 2)
 		super(MageTower, self).update(enemies)
 			
 	def render(self, surface, Transparent=False):

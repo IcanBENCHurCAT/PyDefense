@@ -110,10 +110,8 @@ class Enemy(SpriteAnimate):
 		super(Enemy,self).update()
 		return False
 	
-# 	def render(self, surface):
-# 		x,y = self.position
-# 		surface.blit(self.currentFrame, (x - self.collideBox.width / 2, 
-# 										y - self.collideBox.width / 2))
+	def render(self,surface, position):
+		super(Enemy, self).render(surface, position)
 		
 	def applyBonuses(self, bonuses):
 		if 'health' in bonuses:
