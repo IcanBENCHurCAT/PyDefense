@@ -15,7 +15,8 @@ enemies:
     health: 20
     value: 20
   - 3:
-    class: "Skeleton"
+    class: "Wolf"
     count: 30
-    health: 50
+    health: 30
+    speed: 3
     value: 50

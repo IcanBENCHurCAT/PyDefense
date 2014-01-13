@@ -6,8 +6,16 @@ import Towers
 
 
 """ base Scene object """
+
+#TODO: These values need to be determined via options and a configuration manager
+baseScreenW = 1024
+baseScreenH = 768
+#screenW = 1280
+#screenH = 960
 screenW = 1024
 screenH = 768
+wRatio = float(baseScreenW) / float(screenW)
+hRatio = float(baseScreenH) / float(screenH)
 
 class Scene(object):
 	
@@ -70,22 +78,33 @@ class LevelScene(Scene):
 		if enemy_list:
 			self.drawMap.buildEnemyQueue(enemy_list)
 		
-		self.GUI = MapLoader.MapGUI(screenW, screenH)
+		self.GUI = MapLoader.MapGUI(baseScreenW, baseScreenH)
 		
 	def render(self, screen):
 		screen.fill((255,255,255))
-		self.drawMap.render(screen)
-		self.GUI.render(screen)
+		surface = pygame.Surface((baseScreenW, baseScreenH))
+		
+		self.drawMap.render(surface)
+		self.GUI.render(surface)
 		
 		if self.towerInHand:
-			self.towerInHand.render(screen, Transparent=True)
+			self.towerInHand.render(surface, Transparent=True)
 			self.GUI.setSelectedText(self.towerInHand)
 			self.hoverTower = None
 		elif self.hoverTower:
 			self.GUI.setSelectedText(self.hoverTower)
 		else:
 			self.GUI.selectedItem = ""
-
+			
+		surface = pygame.transform.scale(surface, (screenW, screenH))
+		screen.blit(surface, (0,0))
+	
+	def getCursorXY(self):
+		x,y = pygame.mouse.get_pos()
+		x = x * wRatio
+		y = y * hRatio
+		return (x,y)
+	
 	def update(self):
 		
 		if self.drawMap.winning:
@@ -99,7 +118,7 @@ class LevelScene(Scene):
 		self.GUI.money = self.drawMap.money
 		self.GUI.health = self.drawMap.health
 		if (self.selectedTower <> -1):
-			box = self.drawMap.getPlaceable(pygame.mouse.get_pos())
+			box = self.drawMap.getPlaceable(self.getCursorXY())
 			if box: 
 				if self.towerInHand is None:
 					self.towerInHand = self.towers[self.selectedTower]()
@@ -149,13 +168,13 @@ class LevelScene(Scene):
 					if self.GUI.openTower:
 						self.GUI.closeTowerMenu()
 					self.GUI.openTowerMenu(self.hoverTower)
-				x,y = pygame.mouse.get_pos()
+				x,y = self.getCursorXY()
 				self.GUI.click(x, y, self.drawMap)
 			
 			#Capture the item hovering over
 			if(event.type == MOUSEMOTION):
 				if self.towerInHand is None:
-					self.hoverTower = self.drawMap.getTower(*pygame.mouse.get_pos())
+					self.hoverTower = self.drawMap.getTower(*self.getCursorXY())
 				
 
 

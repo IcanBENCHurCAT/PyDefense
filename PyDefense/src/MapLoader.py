@@ -263,9 +263,9 @@ class MapLoader(object):
 		for enemy in enemy_list:
 			theClass = getattr(Enemies, enemy['class'])
 			theCount = enemy['count']
-			bonuses = {}
-			if 'health' in enemy:
-				bonuses['health'] = enemy['health']
+			bonuses = enemy
+# 			if 'health' in enemy:
+# 				bonuses['health'] = enemy['health']
 			if theClass and theCount:
 				self.enemyQueue.append((theClass,theCount, bonuses))
 	
