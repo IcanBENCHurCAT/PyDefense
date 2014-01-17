@@ -10,10 +10,10 @@ import Towers
 #TODO: These values need to be determined via options and a configuration manager
 baseScreenW = 1024
 baseScreenH = 768
-#screenW = 1280
-#screenH = 960
-screenW = 1024
-screenH = 768
+screenW = 1280
+screenH = 960
+#screenW = 1024
+#screenH = 768
 wRatio = float(baseScreenW) / float(screenW)
 hRatio = float(baseScreenH) / float(screenH)
 
@@ -31,6 +31,12 @@ class Scene(object):
 
 	def handle_events(self, events):
 		raise NotImplementedError
+	
+	def getCursorXY(self):
+		x,y = pygame.mouse.get_pos()
+		x = x * wRatio
+		y = y * hRatio
+		return (x,y)
 
 
 """ SceneManager object """
@@ -79,6 +85,15 @@ class LevelScene(Scene):
 			self.drawMap.buildEnemyQueue(enemy_list)
 		
 		self.GUI = MapLoader.MapGUI(baseScreenW, baseScreenH)
+		from Animators import PauseMenu
+		self.pause_menu = PauseMenu((screenW * .8, screenH * .8),(200,200,200),center=pygame.display.get_surface().get_rect().center, alpha=128)
+		self.is_paused = False
+		self.pause_menu.initExit(self.exitToMain)
+		
+		
+		
+	def exitToMain(self):
+		self.manager.go_to(TitleScene())
 		
 	def render(self, screen):
 		screen.fill((255,255,255))
@@ -98,15 +113,12 @@ class LevelScene(Scene):
 			
 		surface = pygame.transform.scale(surface, (screenW, screenH))
 		screen.blit(surface, (0,0))
-	
-	def getCursorXY(self):
-		x,y = pygame.mouse.get_pos()
-		x = x * wRatio
-		y = y * hRatio
-		return (x,y)
+		if self.is_paused:
+			self.pause_menu.render(screen)
 	
 	def update(self):
-		
+		if self.is_paused:
+			return self.pause_menu.cursorUpdate(pygame.mouse.get_pos())
 		if self.drawMap.winning:
 			self.GUI.winning = True
 			return
@@ -136,6 +148,13 @@ class LevelScene(Scene):
 			
 	def handle_events(self, events):
 		for event in events:
+			if self.is_paused:
+				if event.type == MOUSEBUTTONUP:
+					self.pause_menu.click(pygame.mouse.get_pos())
+				if event.type == KEYUP:
+					if event.key == K_ESCAPE:
+						self.is_paused = False
+				continue
 			if (event.type == KEYDOWN ):
 				if self.drawMap.winning:
 					self.manager.go_to(LevelScene(str(self.currentLevel + 1)))
@@ -176,7 +195,9 @@ class LevelScene(Scene):
 				if self.towerInHand is None:
 					self.hoverTower = self.drawMap.getTower(*self.getCursorXY())
 				
-
+			if event.type == KEYUP:
+					if event.key == K_ESCAPE:
+						self.is_paused = True
 
 """ Title Screen Scene object """
 
@@ -187,25 +208,30 @@ class TitleScene(Scene):
 		super(TitleScene, self).__init__()
 		self.title_font = pygame.font.SysFont('Open Sans', 60)
 		self.sub_font = pygame.font.SysFont('Open Sans', 20)
+		from Animators import StartMenu
+		self.menu = StartMenu((screenW,screenH), (10,10,10))
+		self.menu.initStart(self.newGame)
+		self.menu.initExit(self.exitGame)
 
 	def render(self, screen):
-		screen.fill((108, 192, 78))
+		self.menu.render(screen)
 		title_text = self.title_font.render('PyDefense', True,
 											(255, 255, 255))
-		sub_text = self.sub_font.render('press [space] to start', True,
-										(255, 255, 255))
-		
+# 		
 		w,h = self.title_font.size('PyDefense')
 		screen.blit(title_text, (screenW / 2 - w / 2, 
-								screenH / 2 - h /2))
-		w,h = self.sub_font.size('press [space] to start')
-		screen.blit(sub_text, (screenW / 2 - w /2, 
-							(screenH / 2 + h / 2) + 100))
+								100))
 
 	def update(self):
-		pass
+		self.menu.cursorUpdate(pygame.mouse.get_pos())
+		
+	def newGame(self):
+		self.manager.go_to(LevelScene('1'))
+		
+	def exitGame(self):
+		exit()
 
 	def handle_events(self, events):
 		for e in events:
-			if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
-				self.manager.go_to(LevelScene('1'))
+			if e.type == pygame.MOUSEBUTTONDOWN:
+				self.menu.click(pygame.mouse.get_pos())

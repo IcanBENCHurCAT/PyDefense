@@ -231,4 +231,195 @@ class SwordPhysics(ProjectilePhysics):
 	def update(self):
 		super(SwordPhysics, self).update()
 		self.animation.setRotation(self.current_direction)
+
+class ButtonType(object):
+	green = 0
+	blue = 1
+	red = 2
+
+class ButtonAlignment(object):
+	left = 0
+	center = 1
+	right = 2
+	
+class ButtonAnimate(object):
+	button_image = pygame.image.load('../assets/UI3Buttons.png')
+	text_image = pygame.image.load('../assets/UITextBox.png')
+	font = pygame.font.SysFont('quartzms', 20)
+	bold = False
+	color = (200, 200, 200)
+	
+	def __init__(self, style, text, position, alignment = ButtonAlignment.left):
+		helper = SpriteSheetHelper(self.button_image, 1, 3)
+		self.action = None
+		self.button_rec = None
+		if style == ButtonType.green:
+			self.button_rec = helper.getColumn(0)[0]
+		elif style == ButtonType.blue:
+			self.button_rec = helper.getColumn(1)[0]
+		elif style == ButtonType.red:
+			self.button_rec = helper.getColumn(2)[0]
+		else:
+			raise NotImplementedError
+		
+		self.text = text
+		self.position = position
+		self.alignment = alignment
+		
+		self.is_aligned = False
+		self.makeImage()
+		
+	def render(self, surface):
+		surface.blit(self.full_button, self.position)
+		
+	def cursorUpdate(self, position):
+		if self.collide_rect.collidepoint(position):
+			if self.bold == False:
+				self.bold = True
+				self.color = (255,255,255)
+				self.makeImage()
+		else:
+			self.bold = False
+			self.color = (200,200,200)
+			self.makeImage()
+		
+	def makeImage(self):
+		button_surface = pygame.Surface(self.button_rec.size,pygame.SRCALPHA, 32)
+		button_surface.blit(self.button_image, (0,0), self.button_rec)
+		
+		text_rec = pygame.Rect((0,0), self.font.size(self.text))
+		text_rec.width *= 1.5
+		text_rec.height *= 3
+		text_surface = pygame.Surface(self.text_image.get_size(),pygame.SRCALPHA, 32)
+		text_surface.blit(self.text_image, (0,0))
+		text_surface = pygame.transform.scale(text_surface, text_rec.size)
+		
+		scale = float(text_rec.height) / float(self.button_rec.height)
+		btn_rec = pygame.Rect((0,0),(int(self.button_rec.width * scale), int(self.button_rec.height * scale)))
+		right, top = btn_rec.topright
+		text_rec.topleft = (right - btn_rec.width * .15, top)
+		button_surface = pygame.transform.scale(button_surface,btn_rec.size)
+		
+		self.full_button = pygame.Surface((int(btn_rec.width + text_rec.width), int(btn_rec.height)),pygame.SRCALPHA, 32)
+		self.full_button.blit(text_surface, text_rec.topleft)
+		self.full_button.blit(button_surface, btn_rec.topleft)
+		
+		if self.is_aligned == False:
+			if self.alignment == ButtonAlignment.left:
+				pass
+			elif self.alignment == ButtonAlignment.right:
+				x,y = self.position
+				x -= self.full_button.get_width()
+				self.position = (x,y)
+			elif self.alignment == ButtonAlignment.center:
+				x,y = self.position
+				x -= (self.full_button.get_width() / 2)
+				y -= (self.full_button.get_height() / 2)
+				self.position = (x,y)
+			else:
+				raise NotImplementedError
+			self.is_aligned = True
+		
+		button_text = self.font.render(self.text, True, self.color)
+		txt_rec = pygame.Rect((0,0), self.font.size(self.text))
+		txt_rec.center = text_rec.center
+		self.full_button.blit(button_text, txt_rec.topleft)
+		self.collide_rect = self.full_button.get_rect()
+		self.collide_rect.topleft = self.position
+		
+	def doAction(self):
+		if self.action:
+			self.action()
+		
+class Menu(object):
+	
+	def __init__(self, size, color, position=(0,0), center=None, alpha=255):
+		self.buttons = list()
+		self.background = pygame.Rect(position, size)
+		if center is not None:
+			self.background.center = center
+		self.color = color
+		self.alpha = alpha
+	
+	def cursorUpdate(self, position):
+		for btn in self.buttons:
+			btn.cursorUpdate(position)
+	
+	def render(self, screen):
+		s = pygame.Surface(self.background.size, pygame.SRCALPHA, 32)
+		r,g,b = self.color
+		s.fill((r,g,b,self.alpha))
+		screen.blit(s, self.background.topleft)
+		for btn in self.buttons:
+			btn.render(screen)
+			
+	def click(self, position):
+		for btn in self.buttons:
+			if btn.collide_rect.collidepoint(position):
+				btn.doAction()
+	
+class StartMenu(Menu):
+	
+	start = 0
+	load = 1
+	options = 2
+	exit = 3
+	
+	def __init__(self, size, color, position=(0,0), center=None):
+		super(StartMenu,self).__init__(size, color, position, center)
+		spacing = 80
+		x,y = self.background.center
+		x -= spacing
+		y -= spacing
+		self.buttons.append(ButtonAnimate(ButtonType.green, "    Start    ",(x,y)))
+		y += spacing
+		self.buttons.append(ButtonAnimate(ButtonType.green, "    Load     ", (x,y)))
+		y += spacing
+		self.buttons.append(ButtonAnimate(ButtonType.blue, "    Options  ", (x,y)))
+		y += spacing
+		self.buttons.append(ButtonAnimate(ButtonType.red, "     Exit     ", (x,y)))
+	
+	def initStart(self, action):
+		self.buttons[self.start].action = action
+	
+	def initOptions(self, action):
+		self.buttons[self.options].action = action
+	
+	def initLoad(self, action):
+		self.buttons[self.load].action = action
+	
+	def initExit(self, action):
+		self.buttons[self.exit].action = action
+
+class PauseMenu(Menu):
+	save = 0
+	load = 1
+	options = 2
+	exit = 3
+	
+	def __init__(self, size, color, position=(0,0), center=None, alpha=255):
+		super(PauseMenu,self).__init__(size, color, position, center, alpha)
+		spacing = 80
+		x,y = self.background.center
+		x -= spacing
+		y -= spacing
+		self.buttons.append(ButtonAnimate(ButtonType.green, "    Save    ",(x,y)))
+		y += spacing
+		self.buttons.append(ButtonAnimate(ButtonType.green, "    Load     ", (x,y)))
+		y += spacing
+		self.buttons.append(ButtonAnimate(ButtonType.blue, "    Options  ", (x,y)))
+		y += spacing
+		self.buttons.append(ButtonAnimate(ButtonType.red, "Exit to Main Menu", (x,y)))
+	
+	def initStart(self, action):
+		self.buttons[self.save].action = action
+	
+	def initOptions(self, action):
+		self.buttons[self.options].action = action
+	
+	def initLoad(self, action):
+		self.buttons[self.load].action = action
+	
+	def initExit(self, action):
+		self.buttons[self.exit].action = action
 	

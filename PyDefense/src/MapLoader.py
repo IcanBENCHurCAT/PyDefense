@@ -25,7 +25,6 @@ class MapGUI(object):
 		self.health = 100
 		self.screenW = width
 		self.screenH = height
-		pygame.font.init()
 		self.font = pygame.font.Font(pygame.font.get_default_font(), 20)
 		self.btnUpgrade = MapButton("Upgrade", self.font)
 		self.btnSell = MapButton("Sell", self.font)

@@ -4,7 +4,6 @@ Created on Dec 5, 2013
 @author: gparker
 '''
 import pygame
-import math
 from Animators import *
 
 class Enemy(SpriteAnimate):
