@@ -12,6 +12,6 @@ There is now a main screen, and two levels. If you lose, you can restart the lev
 
 Version 0.1
 ===========
-Currently 'playable' but there is no way to win or lose. Press 'Tab' to add more spherenemies. 
+Currently 'playable' but there is no way to win or lose. Press 'Tab' to add more enemies. 
 Select units with '1', '2' or '3' and place them on the track. Units can be upgraded or sold for 
 80% of their original value.
