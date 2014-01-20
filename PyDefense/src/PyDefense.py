@@ -3,8 +3,16 @@ import pygame.locals
 import sys
 sys.path.append("../../pytmx")
 
-if __name__ == "__main__":
+def initSave():
+	import sqlite3
+	conn = sqlite3.connect('game.db')
+	db = conn.cursor()
+	db.execute('''CREATE TABLE IF NOT EXISTS save_set (id INTEGER PRIMARY KEY,
+		title TEXT, date DATETIME)''')
+	conn.commit()
 
+if __name__ == "__main__":
+	initSave()
 	pygame.init()
 	pygame.font.init()
 	from Scenes import SceneManager,screenW,screenH

@@ -5,6 +5,9 @@ Created on Dec 22, 2013
 '''
 import pygame
 import math
+import tkSimpleDialog
+import os
+from Tkinter import *
 
 class SpriteAnimate(object):
 	
@@ -252,6 +255,7 @@ class ButtonAnimate(object):
 	def __init__(self, style, text, position, alignment = ButtonAlignment.left):
 		helper = SpriteSheetHelper(self.button_image, 1, 3)
 		self.action = None
+		self.params = None
 		self.button_rec = None
 		if style == ButtonType.green:
 			self.button_rec = helper.getColumn(0)[0]
@@ -329,7 +333,10 @@ class ButtonAnimate(object):
 		
 	def doAction(self):
 		if self.action:
-			self.action()
+			if self.params:
+				self.action(*self.params)
+			else:
+				self.action()
 		
 class Menu(object):
 	
@@ -411,7 +418,7 @@ class PauseMenu(Menu):
 		y += spacing
 		self.buttons.append(ButtonAnimate(ButtonType.red, "Exit to Main Menu", (x,y)))
 	
-	def initStart(self, action):
+	def initSave(self, action):
 		self.buttons[self.save].action = action
 	
 	def initOptions(self, action):
@@ -423,3 +430,74 @@ class PauseMenu(Menu):
 	def initExit(self, action):
 		self.buttons[self.exit].action = action
 	
+class SaveMenu(Menu):
+	
+	ok = 0
+	cancel = 1
+	slot = [2, 3, 4]
+	
+	def __init__(self, size, color, position=(0,0), center=None, alpha=255):
+		super(SaveMenu,self).__init__(size, color, position, center, alpha)
+		padding = 10
+		x,y = self.background.bottomleft
+		btn = ButtonAnimate(ButtonType.green, "    OK    ",(x,y))
+		w,h = btn.collide_rect.size
+		y -= (h + padding)
+		x += padding
+		btn.position = (x,y)
+		self.buttons.append(btn)
+		
+		x = self.background.right
+		btn = ButtonAnimate(ButtonType.red, "Cancel", (x,y), 
+			alignment=ButtonAlignment.right)
+		x,y = btn.collide_rect.topleft
+		x -= padding
+		btn.position = (x,y)
+		self.buttons.append(btn)
+		
+		extra_slots = 3
+		x,y = self.background.center
+		padding = h*2
+		y -= 100
+		import sqlite3
+		conn = sqlite3.connect('game.db')
+		db = conn.cursor()
+		for row in db.execute('SELECT * FROM save_set'):
+			extra_slots -= 1
+			text = str.format("{0} {1}", row[1], row[2])
+			self.buttons.append(ButtonAnimate(ButtonType.blue, text, 
+				(x,y), alignment=ButtonAlignment.center))
+			y += padding
+		
+		
+		
+		for i in range(0, extra_slots):
+			self.buttons.append(ButtonAnimate(ButtonType.blue, 'Open Slot',
+				(x,y), alignment=ButtonAlignment.center))
+			y += padding
+		#Slot1
+		
+		#Slot2
+		
+		#Slot3
+		
+		self.selected_slot = 1
+		self.selected_title = "Saved Game"
+		
+	def initOK(self, action):
+		self.buttons[self.ok].action = action
+	
+	def initCancel(self, action):
+		self.buttons[self.cancel].action = action
+		
+	def initSelectSlot(self, action):
+		for slot in self.slot:
+			self.buttons[slot].action = action
+			self.buttons[slot].params = [self.selected_slot, self.selected_title]
+	
+	def click(self, position):
+		for i in self.slot:
+			if self.buttons[i].collide_rect.collidepoint(position):
+				title = self.buttons[i].params[1]
+				self.buttons[i].params = (i - 1, title)
+		super(SaveMenu, self).click(position)

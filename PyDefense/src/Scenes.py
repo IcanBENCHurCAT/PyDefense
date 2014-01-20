@@ -10,10 +10,10 @@ import Towers
 #TODO: These values need to be determined via options and a configuration manager
 baseScreenW = 1024
 baseScreenH = 768
-screenW = 1280
-screenH = 960
-#screenW = 1024
-#screenH = 768
+#screenW = 1280
+#screenH = 960
+screenW = 1024
+screenH = 768
 wRatio = float(baseScreenW) / float(screenW)
 hRatio = float(baseScreenH) / float(screenH)
 
@@ -67,6 +67,7 @@ class LevelScene(Scene):
 	hoverTower = None
 	selectedTower = -1
 	currentLevel = 0
+	save_id = None
 	
 	
 	def __init__(self, level_name):
@@ -89,12 +90,15 @@ class LevelScene(Scene):
 		self.pause_menu = PauseMenu((screenW * .8, screenH * .8),(200,200,200),center=pygame.display.get_surface().get_rect().center, alpha=128)
 		self.is_paused = False
 		self.pause_menu.initExit(self.exitToMain)
+		self.pause_menu.initSave(self.saveGame)
 		
 		
 		
 	def exitToMain(self):
 		self.manager.go_to(TitleScene())
 		
+	def saveGame(self):
+		self.manager.go_to(SaveScene(self))
 	def render(self, screen):
 		screen.fill((255,255,255))
 		surface = pygame.Surface((baseScreenW, baseScreenH))
@@ -235,3 +239,58 @@ class TitleScene(Scene):
 		for e in events:
 			if e.type == pygame.MOUSEBUTTONDOWN:
 				self.menu.click(pygame.mouse.get_pos())
+				
+class SaveScene(Scene):
+	
+	def __init__(self, last_scene):
+		super(SaveScene, self).__init__()
+		self.title_font = pygame.font.SysFont('Open Sans', 60)
+		#self.sub_font = pygame.font.SysFont('Open Sans', 20)
+		from Animators import SaveMenu
+		self.menu = SaveMenu((screenW,screenH), (10,10,10))
+		self.menu.initOK(self.saveOK)
+		self.menu.initCancel(self.saveCancel)
+		self.menu.initSelectSlot(self.selectSlot)
+		self.last_scene = last_scene
+		label = 'Save Your Game'
+		self.title_text = self.title_font.render(label, True,
+											(255, 255, 255))
+		w,h = self.title_font.size(label)
+		self.position = (screenW / 2 - w / 2, 100)
+		
+		self.save_slot = 1
+		self.save_title = "Random Name"
+		
+	def render(self, screen):
+		self.menu.render(screen)
+		screen.blit(self.title_text, self.position)
+
+	def update(self):
+		self.menu.cursorUpdate(pygame.mouse.get_pos())
+
+	def handle_events(self, events):
+		for e in events:
+			if e.type == pygame.MOUSEBUTTONDOWN:
+				self.menu.click(pygame.mouse.get_pos())
+				
+	def selectSlot(self, slot, title):
+		self.save_slot = slot
+		self.save_title = title
+		
+	def saveOK(self, overwrite=False):
+		import sqlite3
+		import time
+		conn = sqlite3.connect('game.db')
+		db = conn.cursor()
+		db.execute("SELECT * FROM save_set WHERE id=?", [self.save_slot])
+		reply = db.fetchone()
+		if reply:
+			if overwrite == False:
+				return False
+		current_time = time.strftime("%Y-%m-%d  %H:%M:%S" ) 
+		db.execute("INSERT INTO save_set VALUES(?, ?, ?)", [self.save_slot, self.save_title, current_time])
+		conn.commit()
+		self.manager.go_to(self.last_scene)
+	
+	def saveCancel(self):
+		self.manager.go_to(self.last_scene)
