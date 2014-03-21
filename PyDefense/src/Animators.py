@@ -301,7 +301,7 @@ class ButtonAnimate(object):
 		scale = float(text_rec.height) / float(self.button_rec.height)
 		btn_rec = pygame.Rect((0,0),(int(self.button_rec.width * scale), int(self.button_rec.height * scale)))
 		right, top = btn_rec.topright
-		text_rec.topleft = (right - btn_rec.width * .15, top)
+		text_rec.topleft = (right - text_rec.width * .1, top)
 		button_surface = pygame.transform.scale(button_surface,btn_rec.size)
 		
 		self.full_button = pygame.Surface((int(btn_rec.width + text_rec.width), int(btn_rec.height)),pygame.SRCALPHA, 32)
@@ -455,34 +455,44 @@ class SaveMenu(Menu):
 		btn.position = (x,y)
 		self.buttons.append(btn)
 		
-		extra_slots = 3
+		slots = 3
+		for i in range(0, slots):
+			self.buttons.append(None)
 		x,y = self.background.center
 		padding = h*2
 		y -= 100
 		import sqlite3
 		conn = sqlite3.connect('game.db')
+		conn.row_factory = sqlite3.Row
 		db = conn.cursor()
-		for row in db.execute('SELECT * FROM save_set'):
-			extra_slots -= 1
-			text = str.format("{0} {1}", row[1], row[2])
-			self.buttons.append(ButtonAnimate(ButtonType.blue, text, 
-				(x,y), alignment=ButtonAlignment.center))
+		db.execute('SELECT * FROM save_set ORDER BY date DESC')
+		self.date_text = {1 : ["", (0,0)],
+						2 : ["", (0,0)],
+						3 : ["", (0,0)]}
+		for row in db.fetchall():
+			text = str.format("{0}", row['title'])
+			slot = int(row['id'])
+			self.buttons[slot + 1] = ButtonAnimate(ButtonType.blue, text, 
+				(x,y), alignment=ButtonAlignment.center)
+			self.date_text[slot][0] = row['date']
+			w,h = self.buttons[slot + 1].font.size(row['date'])
+
+			x2, y2 = (x,y)
+			x2 -= w / 2
+			y2 -= padding / 2 - h / 2
+			self.date_text[slot][1] = (x2,y2)
+			
 			y += padding
 		
-		
-		
-		for i in range(0, extra_slots):
-			self.buttons.append(ButtonAnimate(ButtonType.blue, 'Open Slot',
-				(x,y), alignment=ButtonAlignment.center))
-			y += padding
-		#Slot1
-		
-		#Slot2
-		
-		#Slot3
+
+		for i in range(0, slots):
+			if self.buttons[2 + i] is None:
+				self.buttons[2 + i] = ButtonAnimate(ButtonType.blue, 'Open Slot',
+					(x,y), alignment=ButtonAlignment.center)
+				y += padding
 		
 		self.selected_slot = 1
-		self.selected_title = "Saved Game"
+		self.selected_title = ""
 		
 	def initOK(self, action):
 		self.buttons[self.ok].action = action
@@ -492,12 +502,30 @@ class SaveMenu(Menu):
 		
 	def initSelectSlot(self, action):
 		for slot in self.slot:
-			self.buttons[slot].action = action
-			self.buttons[slot].params = [self.selected_slot, self.selected_title]
+			self.buttons[slot].action = self.make_action(slot, action)
 	
-	def click(self, position):
-		for i in self.slot:
-			if self.buttons[i].collide_rect.collidepoint(position):
-				title = self.buttons[i].params[1]
-				self.buttons[i].params = (i - 1, title)
-		super(SaveMenu, self).click(position)
+	def make_action(self, slot, action):
+		return lambda : action(slot)
+	
+	def input(self, event):
+		if event.key == pygame.K_BACKSPACE:
+			if len(self.selected_title):
+				self.selected_title = self.selected_title[:-1]
+		else:
+			try:
+				a = unichr(event.key) 
+				self.selected_title += str(a)
+			except:
+				print 'Unhandled keyboard input' #Likely a shift?
+				
+	def setTitle(self):
+		 self.selected_title = self.buttons[self.selected_slot].text
+		 
+	def render(self, screen):
+		super(SaveMenu, self).render(screen)
+		for index, data in self.date_text.items():
+			word_text = self.buttons[index + 1].font.render(data[0], False, 
+										(255,255,255))
+			screen.blit(word_text, data[1])
+		
+		

@@ -3,6 +3,7 @@ from pygame.locals import *
 import yaml
 import MapLoader
 import Towers
+from bsddb.test.test_pickle import cPickle
 
 
 """ base Scene object """
@@ -38,6 +39,11 @@ class Scene(object):
 		y = y * hRatio
 		return (x,y)
 
+	def get_pickle(self):
+		raise NotImplementedError
+	
+	def set_pickle(self, d):
+		raise NotImplementedError
 
 """ SceneManager object """
 
@@ -99,6 +105,7 @@ class LevelScene(Scene):
 		
 	def saveGame(self):
 		self.manager.go_to(SaveScene(self))
+		
 	def render(self, screen):
 		screen.fill((255,255,255))
 		surface = pygame.Surface((baseScreenW, baseScreenH))
@@ -202,7 +209,16 @@ class LevelScene(Scene):
 			if event.type == KEYUP:
 					if event.key == K_ESCAPE:
 						self.is_paused = True
-
+						
+	def get_pickle(self):
+		data = dict()
+		
+		return data
+	
+	def set_pickle(self, data):
+		for key,value in data:
+			setattr(self, key, value)
+	
 """ Title Screen Scene object """
 
 
@@ -242,10 +258,10 @@ class TitleScene(Scene):
 				
 class SaveScene(Scene):
 	
+	name_font = pygame.font.SysFont('quartzms', 20)
+	title_font = pygame.font.SysFont('Open Sans', 60)
 	def __init__(self, last_scene):
 		super(SaveScene, self).__init__()
-		self.title_font = pygame.font.SysFont('Open Sans', 60)
-		#self.sub_font = pygame.font.SysFont('Open Sans', 20)
 		from Animators import SaveMenu
 		self.menu = SaveMenu((screenW,screenH), (10,10,10))
 		self.menu.initOK(self.saveOK)
@@ -264,18 +280,39 @@ class SaveScene(Scene):
 	def render(self, screen):
 		self.menu.render(screen)
 		screen.blit(self.title_text, self.position)
+		
+		name_text = self.name_font.render(self.save_title, False,
+										(255,255,255))
+		w,h = self.name_font.size(self.save_title)
+		pos = (screenW / 2 - w / 2, screenH - h - 25)
+		screen.blit(name_text, pos)
+		
+		name_text = self.name_font.render("Save Name:", False, 
+										(255,255,255))
+		w,h = self.name_font.size("Save Name:")
+		x,y = pos
+		pos = (screenW / 2 - w /2, screenH - h - 50)
+		screen.blit(name_text, pos)
+		
 
 	def update(self):
 		self.menu.cursorUpdate(pygame.mouse.get_pos())
+		self.save_title = self.menu.selected_title
 
 	def handle_events(self, events):
 		for e in events:
 			if e.type == pygame.MOUSEBUTTONDOWN:
 				self.menu.click(pygame.mouse.get_pos())
+			if e.type == pygame.KEYUP:
+				self.menu.input(e)
 				
-	def selectSlot(self, slot, title):
-		self.save_slot = slot
-		self.save_title = title
+# 	def selectSlot(self, slot, title):
+# 		self.save_slot = slot
+# 		self.save_title = title
+		
+	def selectSlot(self, slot):
+		self.save_slot = self.menu.selected_slot = slot
+		self.menu.setTitle()
 		
 	def saveOK(self, overwrite=False):
 		import sqlite3
@@ -285,11 +322,13 @@ class SaveScene(Scene):
 		db.execute("SELECT * FROM save_set WHERE id=?", [self.save_slot])
 		reply = db.fetchone()
 		if reply:
-			if overwrite == False:
-				return False
+			db.execute("DELETE FROM save_set WHERE id=?", [self.save_slot])
+		#pdata = cPickle.dumps(self.last_scene.get_pickle())
 		current_time = time.strftime("%Y-%m-%d  %H:%M:%S" ) 
 		db.execute("INSERT INTO save_set VALUES(?, ?, ?)", [self.save_slot, self.save_title, current_time])
 		conn.commit()
+		#load = cPickle.loads(pdata)
+		#self.last_scene.set_pickle(load)
 		self.manager.go_to(self.last_scene)
 	
 	def saveCancel(self):
