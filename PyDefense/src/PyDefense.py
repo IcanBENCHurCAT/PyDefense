@@ -2,14 +2,20 @@ import pygame
 import pygame.locals
 import sys
 sys.path.append("../../pytmx")
-from Animators import *
 
-
-from Scenes import *
+def initSave():
+	import sqlite3
+	conn = sqlite3.connect('game.db')
+	db = conn.cursor()
+	db.execute('''CREATE TABLE IF NOT EXISTS save_set (id INTEGER PRIMARY KEY,
+		title TEXT, date DATETIME)''')
+	conn.commit()
 
 if __name__ == "__main__":
-
+	initSave()
 	pygame.init()
+	pygame.font.init()
+	from Scenes import SceneManager,screenW,screenH
 	screen = pygame.display.set_mode((screenW, screenH))
 	clock = pygame.time.Clock()
 
@@ -28,7 +34,7 @@ if __name__ == "__main__":
 			game_over = True
 		
 		keys = pygame.key.get_pressed()
-		if(keys[K_SPACE]):
+		if(keys[pygame.K_SPACE]):
 			timeScaler = 3.0
 		else:
 			timeScaler = 1.0

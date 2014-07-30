@@ -4,7 +4,6 @@ Created on Dec 5, 2013
 @author: gparker
 '''
 import pygame
-import math
 from Animators import *
 
 class Enemy(SpriteAnimate):
@@ -12,6 +11,7 @@ class Enemy(SpriteAnimate):
 	position = (0,0)
 	floatPosition = (0.0,0.0)
 	health = 0
+	max_health = 0
 	value = 0
 	armor = 0
 	speed = 0 #how many updates before moving one pixel 
@@ -30,6 +30,9 @@ class Enemy(SpriteAnimate):
 		super(Enemy,self).__init__(full_animation)
 		self.collideBox = pygame.Rect(x,y,*(self.current_frame.size))
 		self.update_delay = 25
+		self.healthBar = pygame.Rect((self.collideBox.bottomleft), (self.collideBox.width / 2, 5))
+		self.healthBar.centerx = self.collideBox.centerx
+		self.max_health = self.health
 
 	def getNextTarget(self):
 		currNode = self.path.index(self.target)
@@ -107,23 +110,27 @@ class Enemy(SpriteAnimate):
 		x,y = self.position
 		self.collideBox = pygame.Rect((x - width / 2, y - height / 2), 
 									(width,height))
+		self.healthBar.centerx = self.collideBox.centerx
+		self.healthBar.y = self.collideBox.bottom
 		super(Enemy,self).update()
 		return False
 	
-# 	def render(self, surface):
-# 		x,y = self.position
-# 		surface.blit(self.currentFrame, (x - self.collideBox.width / 2, 
-# 										y - self.collideBox.width / 2))
+	def render(self,surface, position):
+		super(Enemy, self).render(surface, position)
+		pygame.draw.rect(surface, (255,0,0), self.healthBar)
+		hp = pygame.Rect(self.healthBar.topleft, (int(self.healthBar.width * (float(self.health) / float(self.max_health))), self.healthBar.height))
+		pygame.draw.rect(surface, (0,255,0), hp)
 		
 	def applyBonuses(self, bonuses):
 		if 'health' in bonuses:
 			self.health += bonuses['health']
+			self.max_health = self.health
 		if 'armor' in bonuses:
 			self.armor += bonuses['armor'] #TODO: implement
 		if 'resist' in bonuses:
 			pass #TODO: implement
 		if 'speed' in bonuses:
-			self.speed /= bonuses['speed']
+			self.speed -= bonuses['speed'] #TODO: also affect update rate?
 		if 'value' in bonuses:
 			self.value += bonuses['value']
 
@@ -186,7 +193,7 @@ class Wolf(Enemy):
 	
 	def __init__(self, path):
 		self.health = 10
-		self.speed = 2
+		self.speed = 5
 		self.damage = 10
 		self.value = 15
 		helper = SpriteSheetHelper(self.image, 4, 5 )

@@ -20,12 +20,11 @@ class MapGUI(object):
 	losing = False
 	
 	def __init__(self, width, height):
-		locale.setlocale( locale.LC_ALL, '' )
+		locale.setlocale(locale.LC_ALL, '')
 		self.money = 200
 		self.health = 100
 		self.screenW = width
 		self.screenH = height
-		pygame.font.init()
 		self.font = pygame.font.Font(pygame.font.get_default_font(), 20)
 		self.btnUpgrade = MapButton("Upgrade", self.font)
 		self.btnSell = MapButton("Sell", self.font)
@@ -46,44 +45,44 @@ class MapGUI(object):
 	def click(self, x, y, theMap):
 		if self.openTower:
 			rec = self.sellLoc()
-			if rec.collidepoint(x,y):
-				theMap.money += (self.openTower.cost * .80) #Needs 'upgrade cost' added in
+			if rec.collidepoint(x, y):
+				theMap.money += (self.openTower.cost * .80)  # Needs 'upgrade cost' added in
 				theMap.removeTower(self.openTower)
 				self.closeTowerMenu()
 			rec = self.upgradeLoc()
-			if rec.collidepoint(x,y) and self.openTower.level < self.openTower.maxLevel and self.money >= self.openTower.upgradeCost:
+			if rec.collidepoint(x, y) and self.openTower.level < self.openTower.maxLevel and self.money >= self.openTower.upgradeCost:
 				theMap.money -= self.openTower.upgradeCost
 				self.openTower.upgrade()
 				self.closeTowerMenu()
 	
 	def render(self, surface):
-		#Print Money top-left
-		text = locale.currency( self.money, grouping=True )
-		i = self.font.render(text, 1, (180,180,0))
+		# Print Money top-left
+		text = locale.currency(self.money, grouping=True)
+		i = self.font.render(text, 1, (180, 180, 0))
 		
 		sizeX, sizeY = self.font.size(text)
 		x = self.screenW - sizeX - 15
 		y = 15
-		surface.blit(i, (x,y))
+		surface.blit(i, (x, y))
 		
 		text = "HP: {0}".format(self.health)
 		i = self.font.render(text, 1, (180, 180, 0))
-		x,y = (15,15)
-		surface.blit(i, (x,y))
+		x, y = (15, 15)
+		surface.blit(i, (x, y))
 		
 		text = self.selectedItem
 		i = self.font.render(text, 1, (180, 180, 0))
 		sizeX, sizeY = self.font.size(text)
 		x = 15
 		y = self.screenH - sizeY - 15
-		surface.blit(i, (x,y))
+		surface.blit(i, (x, y))
 		
 		if self.openTower:
 			rec = self.sellLoc()
-			self.btnSell.render(surface, (rec.x,rec.y))
+			self.btnSell.render(surface, (rec.x, rec.y))
 			
 			rec = self.upgradeLoc()
-			self.btnUpgrade.render(surface, (rec.x,rec.y))
+			self.btnUpgrade.render(surface, (rec.x, rec.y))
 		
 		if self.winning or self.losing:
 			text = "Winning! Press Any Key to Move to the Next Level"
@@ -91,8 +90,8 @@ class MapGUI(object):
 				text = "You suck again! Press Any Key to Restart the Level"
 			i = self.font.render(text, 1, (180, 180, 0))
 			sizeX, sizeY = self.font.size(text)
-			x,y = (self.screenW /2 - sizeX / 2, self.screenH / 2 - sizeY / 2)
-			surface.blit(i, (x,y))
+			x, y = (self.screenW / 2 - sizeX / 2, self.screenH / 2 - sizeY / 2)
+			surface.blit(i, (x, y))
 			
 	def upgradeLoc(self):
 		rec = self.sellLoc()
@@ -104,8 +103,8 @@ class MapGUI(object):
 	def sellLoc(self):
 		x = self.screenW - self.btnSell.width - 15
 		y = self.screenH - self.btnSell.height - 15
-		rec = pygame.Rect(x, y, 
-						self.btnSell.width, 
+		rec = pygame.Rect(x, y,
+						self.btnSell.width,
 						self.btnSell.height)
 		return rec
 	
@@ -115,10 +114,10 @@ class MapButton(object):
 	text = ""
 	font = None
 	surface = None
-	borderColor = (0,0,0)
+	borderColor = (0, 0, 0)
 	borderWidth = 1
 	buttonScale = 1.5
-	buttonColor = (0,0,255)
+	buttonColor = (0, 0, 255)
 	buttonRect = None
 	transparency = 100
 	
@@ -129,18 +128,18 @@ class MapButton(object):
 		self.width = int(width * self.buttonScale)
 		self.height = int(height * self.buttonScale)
 		self.buttonRect = pygame.Rect(self.borderWidth,
-									self.borderWidth, 
-									self.width - (2 * self.borderWidth), 
+									self.borderWidth,
+									self.width - (2 * self.borderWidth),
 									self.height - (2 * self.borderWidth))
 		self.surface = pygame.Surface((self.width, self.height))
 		self.surface.fill(self.borderColor)
 		buttonSurface = pygame.Surface((self.buttonRect.width, self.buttonRect.height))
 		buttonSurface.fill(self.buttonColor)
 		self.surface.blit(buttonSurface, (self.borderWidth, self.borderWidth))
-		image = self.font.render(text, 1, (180,180,0))
+		image = self.font.render(text, 1, (180, 180, 0))
 		x = (self.width / 2) - (width / 2)
 		y = (self.height / 2) - (height / 2)
-		self.surface.blit(image, (x,y))
+		self.surface.blit(image, (x, y))
 		self.surface.set_alpha(self.transparency)
 		
 	def render(self, surface, *coords):
@@ -151,7 +150,7 @@ class MapLoader(object):
 	'''
 	classdocs
 	'''
-	placeable = [] #list of placeable boxes
+	placeable = []  # list of placeable boxes
 	towers = []
 	enemyQueue = []
 	bufferedEnemies = []
@@ -174,8 +173,8 @@ class MapLoader(object):
 		self.bufferedEnemies = []
 		self.activeEnemies = []
 		self.enemyPath = []
-		import tmxloader
-		self.tiledmap = tmxloader.load_pygame(filename, pixelalpha=True)
+		import pytmx
+		self.tiledmap = pytmx.load_pygame(filename, pixelalpha=True)
 		for group in self.tiledmap.objectgroups:
 			for obj in group:
 				if obj.type == "Entrance":
@@ -187,23 +186,20 @@ class MapLoader(object):
 					x = obj.x
 					y = obj.y
 					for pt in points:
-						newX,newY = pt
-						newX += x
-						newY += y
-						self.enemyPath.append((newX,newY))
+						self.enemyPath.append(pt)
 						
 		tw = self.tiledmap.tilewidth
 		th = self.tiledmap.tileheight
-		gt = self.tiledmap.getTileImage
-		layers = self.tiledmap.tilelayers
-		for l in xrange(0, len(self.tiledmap.tilelayers)):
+		# gt = self.tiledmap.get_tile_image(x, y, layer)
+		# layers = self.tiledmap.tilelayers
+		for l in xrange(0, len(self.tiledmap.layers)):
 			for y in xrange(0, self.tiledmap.height):
 				for x in xrange(0, self.tiledmap.width):
-					if hasattr(layers[l],"placeable"):
-						if layers[l].placeable == "true":
-							tile = gt(x, y, l)
+					if hasattr(self.tiledmap.layers[l], "placeable"):
+						if self.tiledmap.layers[l].placeable == "true":
+							tile = self.tiledmap.get_tile_image(x, y, l)
 							if tile: 
-								self.placeable.append(pygame.Rect(x*tw,y*th,tw,th))
+								self.placeable.append(pygame.Rect(x * tw, y * th, tw, th))
 		
 		self.enemy_delay = self.delay_max
 		
@@ -213,7 +209,7 @@ class MapLoader(object):
 		if (len(self.bufferedEnemies) > 0 and self.enemyTimer >= self.enemy_delay):
 			self.enemyTimer -= self.enemy_delay
 			self.activeEnemies.append(self.bufferedEnemies.pop())
-			self.enemy_delay = random.randint(50,self.delay_max)
+			self.enemy_delay = random.randint(50, self.delay_max)
 		
 		self.enemyTimer += 1
 		
@@ -237,24 +233,27 @@ class MapLoader(object):
 	def render(self, surface):
 		tw = self.tiledmap.tilewidth
 		th = self.tiledmap.tileheight
-		gt = self.tiledmap.getTileImage
+		# gt = self.tiledmap.getTileImage
 
-		for l in xrange(0, len(self.tiledmap.tilelayers)):
+		for l in xrange(0, len(self.tiledmap.layers)):
 			for y in xrange(0, self.tiledmap.height):
 				for x in xrange(0, self.tiledmap.width):
-					tile = gt(x, y, l)
+					try:
+						tile = self.tiledmap.get_tile_image(x, y, l)
+					except:
+						pass
 					if tile: 
-						surface.blit(tile, (x*tw, y*th)) #add the tile to the image to be drawn
+						surface.blit(tile, (x * tw, y * th))  # add the tile to the image to be drawn
 		
-		#Need to order items from lowest Y to highest Y and call render() on each of them
+		# Need to order items from lowest Y to highest Y and call render() on each of them
 		drawable = list()
 		for enemy in self.activeEnemies:
 			drawable.append(enemy)
-			#enemy.render(surface)
+			# enemy.render(surface)
 			
 		for tower in self.towers:
 			drawable.append(tower)
-			#tower.render(surface)
+			# tower.render(surface)
 		
 		for item in sorted(drawable, key=lambda item: item.collideBox.y):
 			item.render(surface)
@@ -263,11 +262,11 @@ class MapLoader(object):
 		for enemy in enemy_list:
 			theClass = getattr(Enemies, enemy['class'])
 			theCount = enemy['count']
-			bonuses = {}
-			if 'health' in enemy:
-				bonuses['health'] = enemy['health']
+			bonuses = enemy
+# 			if 'health' in enemy:
+# 				bonuses['health'] = enemy['health']
 			if theClass and theCount:
-				self.enemyQueue.append((theClass,theCount, bonuses))
+				self.enemyQueue.append((theClass, theCount, bonuses))
 	
 	def getPlaceable(self, coords):
 		'''
@@ -286,7 +285,7 @@ class MapLoader(object):
 	
 	def getTower(self, x, y):
 		for tower in self.towers:
-			if tower.collideBox.collidepoint(x,y):
+			if tower.collideBox.collidepoint(x, y):
 				return tower
 			
 	def placeTower(self, tower):
@@ -295,8 +294,8 @@ class MapLoader(object):
 	def removeTower(self, tower):
 		self.towers.remove(tower)
 		
-	#def addEnemy(self):
-		#self.activeEnemies.append(Enemies.Sphere(self.enemyPath))
+	# def addEnemy(self):
+		# self.activeEnemies.append(Enemies.Sphere(self.enemyPath))
 		
 	def sendNextWave(self):
 		if self.finalwave:
@@ -304,8 +303,8 @@ class MapLoader(object):
 		
 		if len(self.enemyQueue) == 1:
 			self.finalwave = True
-		enemy,count,bonuses = self.enemyQueue.pop(0)
-		for i in range(0,count):
+		enemy, count, bonuses = self.enemyQueue.pop(0)
+		for i in range(0, count):
 			e = enemy(self.enemyPath)
 			e.applyBonuses(bonuses)
 			self.bufferedEnemies.append(e)

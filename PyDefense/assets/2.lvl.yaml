@@ -7,11 +7,22 @@ level:
 
 enemies:
   - 1:
-    class: "Zombie"
+    class: "Spider"
     count: 10
+    health: 10
+    speed: 3
+    value: 20
+    
   - 2:
-    class: "Zombie"
+    class: "Crow"
     count: 20
+    health: 30
+    speed: 3
+    value: 50
+    
   - 3:
-    class: "Zombie"
+    class: "Crow"
     count: 40
+    health: 50
+    speed: 1
+    value: 200
