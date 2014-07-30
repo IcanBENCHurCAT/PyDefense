@@ -435,6 +435,7 @@ class SaveMenu(Menu):
 	ok = 0
 	cancel = 1
 	slot = [2, 3, 4]
+	default_text = 'Open Slot'
 	
 	def __init__(self, size, color, position=(0,0), center=None, alpha=255):
 		super(SaveMenu,self).__init__(size, color, position, center, alpha)
@@ -487,7 +488,7 @@ class SaveMenu(Menu):
 
 		for i in range(0, slots):
 			if self.buttons[2 + i] is None:
-				self.buttons[2 + i] = ButtonAnimate(ButtonType.blue, 'Open Slot',
+				self.buttons[2 + i] = ButtonAnimate(ButtonType.blue, self.default_text,
 					(x,y), alignment=ButtonAlignment.center)
 				y += padding
 		
@@ -519,7 +520,10 @@ class SaveMenu(Menu):
 				print 'Unhandled keyboard input' #Likely a shift?
 				
 	def setTitle(self):
-		 self.selected_title = self.buttons[self.selected_slot].text
+		if(self.default_text == self.buttons[self.selected_slot].text):
+			self.selected_title = ''
+		else:
+			self.selected_title = self.buttons[self.selected_slot].text
 		 
 	def render(self, screen):
 		super(SaveMenu, self).render(screen)

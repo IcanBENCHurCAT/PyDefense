@@ -246,7 +246,7 @@ class TitleScene(Scene):
 		self.menu.cursorUpdate(pygame.mouse.get_pos())
 		
 	def newGame(self):
-		self.manager.go_to(LevelScene('1'))
+		self.manager.go_to(LevelScene('2'))
 		
 	def exitGame(self):
 		exit()
@@ -319,13 +319,13 @@ class SaveScene(Scene):
 		import time
 		conn = sqlite3.connect('game.db')
 		db = conn.cursor()
-		db.execute("SELECT * FROM save_set WHERE id=?", [self.save_slot])
+		db.execute("SELECT * FROM save_set WHERE id=?", [self.save_slot-1])
 		reply = db.fetchone()
 		if reply:
-			db.execute("DELETE FROM save_set WHERE id=?", [self.save_slot])
+			db.execute("DELETE FROM save_set WHERE id=?", [self.save_slot-1])
 		#pdata = cPickle.dumps(self.last_scene.get_pickle())
 		current_time = time.strftime("%Y-%m-%d  %H:%M:%S" ) 
-		db.execute("INSERT INTO save_set VALUES(?, ?, ?)", [self.save_slot, self.save_title, current_time])
+		db.execute("INSERT INTO save_set VALUES(?, ?, ?)", [self.save_slot-1, self.save_title, current_time])
 		conn.commit()
 		#load = cPickle.loads(pdata)
 		#self.last_scene.set_pickle(load)

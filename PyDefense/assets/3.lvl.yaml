@@ -1,7 +1,17 @@
-# level two data
+# level three data
 
 level:
   description: Level 3
   map: Level3.tmx
   difficulty: easy
   
+  enemies:
+  - 1:
+    class: "Spider"
+    count: 10
+  - 2:
+    class: "Spider"
+    count: 20
+  - 3:
+    class: "Spider"
+    count: 40
