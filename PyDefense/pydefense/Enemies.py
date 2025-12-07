@@ -75,9 +75,12 @@ class Enemy(SpriteAnimate):
 		if self.health <= 0:
 			return self.value
 			
-		self.distanceCounter += 1.0 / self.speed
+		if self.speed > 0:
+			self.distanceCounter += 1.0 / self.speed
+		else:
+			self.distanceCounter = 0
 		currSpeed = 0
-		while self.distanceCounter > 1.0:
+		while self.distanceCounter >= 1.0:
 			currSpeed += 1
 			self.distanceCounter -= 1
 		#if we should move at least one 'unit'
