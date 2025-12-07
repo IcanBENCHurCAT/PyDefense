@@ -1,9 +1,10 @@
 import pygame
 from pygame.locals import *
 import yaml
-import MapLoader
-import Towers
-from bsddb.test.test_pickle import cPickle
+import os
+import pickle
+from . import MapLoader
+from . import Towers
 
 
 """ base Scene object """
@@ -78,10 +79,12 @@ class LevelScene(Scene):
 	
 	def __init__(self, level_name):
 		super(LevelScene, self).__init__()
-		assets_path = '../assets/'
-		yaml_file = open(assets_path + level_name + '.lvl.yaml')
-		level_data = yaml.safe_load(yaml_file)
-		yaml_file.close()
+		# Calculate path to assets relative to this file
+		base_path = os.path.dirname(os.path.abspath(__file__))
+		assets_path = os.path.join(base_path, '..', 'assets') + os.sep
+
+		with open(assets_path + level_name + '.lvl.yaml') as yaml_file:
+			level_data = yaml.safe_load(yaml_file)
 		self.currentLevel = int(level_name)
 
 		map_data = level_data.get('level')
@@ -92,7 +95,7 @@ class LevelScene(Scene):
 			self.drawMap.buildEnemyQueue(enemy_list)
 		
 		self.GUI = MapLoader.MapGUI(baseScreenW, baseScreenH)
-		from Animators import PauseMenu
+		from .Animators import PauseMenu
 		self.pause_menu = PauseMenu((screenW * .8, screenH * .8),(200,200,200),center=pygame.display.get_surface().get_rect().center, alpha=128)
 		self.is_paused = False
 		self.pause_menu.initExit(self.exitToMain)
@@ -140,7 +143,7 @@ class LevelScene(Scene):
 		self.drawMap.update()
 		self.GUI.money = self.drawMap.money
 		self.GUI.health = self.drawMap.health
-		if (self.selectedTower <> -1):
+		if (self.selectedTower != -1):
 			box = self.drawMap.getPlaceable(self.getCursorXY())
 			if box: 
 				if self.towerInHand is None:
@@ -149,12 +152,21 @@ class LevelScene(Scene):
 				
 				self.towerInHand.setLocation(box)
 				
-				pygame.mouse.set_cursor(*pygame.cursors.arrow)
+				try:
+					pygame.mouse.set_cursor(*pygame.cursors.arrow)
+				except pygame.error:
+					pass
 			else:
-				pygame.mouse.set_cursor(*pygame.cursors.broken_x)
+				try:
+					pygame.mouse.set_cursor(*pygame.cursors.broken_x)
+				except pygame.error:
+					pass
 				self.towerInHand = None
 		else:
-			pygame.mouse.set_cursor(*pygame.cursors.arrow)
+			try:
+				pygame.mouse.set_cursor(*pygame.cursors.arrow)
+			except pygame.error:
+				pass
 			self.towerInHand = None
 			
 	def handle_events(self, events):
@@ -184,7 +196,7 @@ class LevelScene(Scene):
 					self.GUI.closeTowerMenu()
 					self.hoverTower = None
 				
-				if self.selectedTower <> -1:
+				if self.selectedTower != -1:
 					self.towerInHand = None
 					self.GUI.closeTowerMenu()
 			
@@ -228,7 +240,7 @@ class TitleScene(Scene):
 		super(TitleScene, self).__init__()
 		self.title_font = pygame.font.SysFont('Open Sans', 60)
 		self.sub_font = pygame.font.SysFont('Open Sans', 20)
-		from Animators import StartMenu
+		from .Animators import StartMenu
 		self.menu = StartMenu((screenW,screenH), (10,10,10))
 		self.menu.initStart(self.newGame)
 		self.menu.initExit(self.exitGame)
@@ -262,7 +274,7 @@ class SaveScene(Scene):
 	title_font = pygame.font.SysFont('Open Sans', 60)
 	def __init__(self, last_scene):
 		super(SaveScene, self).__init__()
-		from Animators import SaveMenu
+		from .Animators import SaveMenu
 		self.menu = SaveMenu((screenW,screenH), (10,10,10))
 		self.menu.initOK(self.saveOK)
 		self.menu.initCancel(self.saveCancel)
@@ -317,7 +329,9 @@ class SaveScene(Scene):
 	def saveOK(self, overwrite=False):
 		import sqlite3
 		import time
-		conn = sqlite3.connect('game.db')
+		# Connect to game.db relative to this file
+		db_path = os.path.join(os.path.dirname(__file__), 'game.db')
+		conn = sqlite3.connect(db_path)
 		db = conn.cursor()
 		db.execute("SELECT * FROM save_set WHERE id=?", [self.save_slot-1])
 		reply = db.fetchone()

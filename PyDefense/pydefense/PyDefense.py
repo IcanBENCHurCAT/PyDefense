@@ -1,21 +1,24 @@
 import pygame
 import pygame.locals
 import sys
-sys.path.append("../../pytmx")
+import os
 
 def initSave():
 	import sqlite3
-	conn = sqlite3.connect('game.db')
+	# Ensure game.db is created in the same directory as the script or a user data dir.
+	# For simplicity, we keep it relative to this file.
+	db_path = os.path.join(os.path.dirname(__file__), 'game.db')
+	conn = sqlite3.connect(db_path)
 	db = conn.cursor()
 	db.execute('''CREATE TABLE IF NOT EXISTS save_set (id INTEGER PRIMARY KEY,
 		title TEXT, date DATETIME)''')
 	conn.commit()
 
-if __name__ == "__main__":
+def main():
 	initSave()
 	pygame.init()
 	pygame.font.init()
-	from Scenes import SceneManager,screenW,screenH
+	from .Scenes import SceneManager, screenW, screenH
 	screen = pygame.display.set_mode((screenW, screenH))
 	clock = pygame.time.Clock()
 
@@ -45,3 +48,6 @@ if __name__ == "__main__":
 
 
 		pygame.display.flip()
+
+if __name__ == "__main__":
+	main()

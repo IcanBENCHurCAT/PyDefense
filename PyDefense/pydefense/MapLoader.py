@@ -5,8 +5,9 @@ Created on Dec 3, 2013
 '''
 import pygame
 import locale
-import Enemies
+from . import Enemies
 import random
+import pytmx
 
 class MapGUI(object):
 	screenW = 0
@@ -20,7 +21,11 @@ class MapGUI(object):
 	losing = False
 	
 	def __init__(self, width, height):
-		locale.setlocale(locale.LC_ALL, '')
+		try:
+			locale.setlocale(locale.LC_ALL, '')
+		except locale.Error:
+			print("Locale not supported, using default")
+
 		self.money = 200
 		self.health = 100
 		self.screenW = width
@@ -57,7 +62,11 @@ class MapGUI(object):
 	
 	def render(self, surface):
 		# Print Money top-left
-		text = locale.currency(self.money, grouping=True)
+		try:
+			text = locale.currency(self.money, grouping=True)
+		except ValueError:
+			text = "${:,.2f}".format(self.money)
+
 		i = self.font.render(text, 1, (180, 180, 0))
 		
 		sizeX, sizeY = self.font.size(text)
@@ -173,7 +182,7 @@ class MapLoader(object):
 		self.bufferedEnemies = []
 		self.activeEnemies = []
 		self.enemyPath = []
-		import pytmx
+
 		self.tiledmap = pytmx.load_pygame(filename, pixelalpha=True)
 		for group in self.tiledmap.objectgroups:
 			for obj in group:
@@ -192,9 +201,9 @@ class MapLoader(object):
 		th = self.tiledmap.tileheight
 		# gt = self.tiledmap.get_tile_image(x, y, layer)
 		# layers = self.tiledmap.tilelayers
-		for l in xrange(0, len(self.tiledmap.layers)):
-			for y in xrange(0, self.tiledmap.height):
-				for x in xrange(0, self.tiledmap.width):
+		for l in range(0, len(self.tiledmap.layers)):
+			for y in range(0, self.tiledmap.height):
+				for x in range(0, self.tiledmap.width):
 					if hasattr(self.tiledmap.layers[l], "placeable"):
 						if self.tiledmap.layers[l].placeable == "true":
 							tile = self.tiledmap.get_tile_image(x, y, l)
@@ -235,9 +244,9 @@ class MapLoader(object):
 		th = self.tiledmap.tileheight
 		# gt = self.tiledmap.getTileImage
 
-		for l in xrange(0, len(self.tiledmap.layers)):
-			for y in xrange(0, self.tiledmap.height):
-				for x in xrange(0, self.tiledmap.width):
+		for l in range(0, len(self.tiledmap.layers)):
+			for y in range(0, self.tiledmap.height):
+				for x in range(0, self.tiledmap.width):
 					try:
 						tile = self.tiledmap.get_tile_image(x, y, l)
 					except:
