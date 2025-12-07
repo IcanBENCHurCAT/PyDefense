@@ -4,7 +4,13 @@ Created on Dec 5, 2013
 @author: gparker
 '''
 import pygame
-from Animators import *
+from .Animators import *
+import math
+import os
+
+# Calculate path to assets relative to this file
+base_path = os.path.dirname(os.path.abspath(__file__))
+assets_path = os.path.join(base_path, '..', 'assets') + os.sep
 
 class Enemy(SpriteAnimate):
 	collideBox = pygame.Rect(0,0,0,0)
@@ -36,7 +42,7 @@ class Enemy(SpriteAnimate):
 
 	def getNextTarget(self):
 		currNode = self.path.index(self.target)
-		if currNode <> (len(self.path) - 1):
+		if currNode != (len(self.path) - 1):
 			currNode += 1
 		return self.path[currNode]
 	
@@ -135,9 +141,16 @@ class Enemy(SpriteAnimate):
 			self.value += bonuses['value']
 
 class Skeleton(Enemy):
-	image = pygame.image.load('../assets/zombie_n_skeleton2.png')
+	image_path = assets_path + 'zombie_n_skeleton2.png'
+	# Lazy loading of image to avoid pygame init issues if imported early,
+	# but since we init pygame in main, this might be fine if instantiated later.
+	# However, class attributes are evaluated at import time.
+	# We should probably load images in __init__ or use a resource manager.
+	# For now, I'll keep it as is but assuming pygame.display.set_mode hasn't been called yet might be an issue for convert() if used.
+	# But pygame.image.load works without set_mode.
 	
 	def __init__(self, path):
+		self.image = pygame.image.load(self.image_path)
 		self.health = 10
 		self.speed = 5
 		self.damage = 10
@@ -153,9 +166,10 @@ class Skeleton(Enemy):
 		super(Skeleton, self).render(surface, self.collideBox.topleft)
 		
 class Zombie(Enemy):
-	image = pygame.image.load('../assets/zombie_n_skeleton2.png')
+	image_path = assets_path + 'zombie_n_skeleton2.png'
 	
 	def __init__(self, path):
+		self.image = pygame.image.load(self.image_path)
 		self.health = 10
 		self.speed = 5
 		self.damage = 10
@@ -171,9 +185,10 @@ class Zombie(Enemy):
 		super(Zombie, self).render(surface, self.collideBox.topleft)
 
 class Spider(Enemy):
-	image = pygame.image.load('../assets/spider_4.png')
+	image_path = assets_path + 'spider_4.png'
 	
 	def __init__(self, path):
+		self.image = pygame.image.load(self.image_path)
 		self.health = 10
 		self.speed = 5
 		self.damage = 10
@@ -189,9 +204,10 @@ class Spider(Enemy):
 		super(Spider, self).render(surface, self.collideBox.topleft)
 
 class Wolf(Enemy):
-	image = pygame.image.load('../assets/wolfsheet.png')
+	image_path = assets_path + 'wolfsheet.png'
 	
 	def __init__(self, path):
+		self.image = pygame.image.load(self.image_path)
 		self.health = 10
 		self.speed = 5
 		self.damage = 10
@@ -207,9 +223,10 @@ class Wolf(Enemy):
 		super(Wolf, self).render(surface, self.collideBox.topleft)
 		
 class Crow(Enemy):
-	image = pygame.image.load('../assets/crow.png')
+	image_path = assets_path + 'crow.png'
 	
 	def __init__(self, path):
+		self.image = pygame.image.load(self.image_path)
 		self.health = 10
 		self.speed = 5
 		self.damage = 10
@@ -226,11 +243,10 @@ class Crow(Enemy):
 		
 	def update(self):
 		ret = super(Crow, self).update()
-		if self.last_x <> self.collideBox.x:
+		if self.last_x != self.collideBox.x:
 			if self.last_x < self.collideBox.x:
 				self.setAnimation('right')
 			else:
 				self.setAnimation('left')
 			self.last_x = self.collideBox.x
 		return ret
-		

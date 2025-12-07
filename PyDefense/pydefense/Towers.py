@@ -5,7 +5,12 @@ Created on Dec 3, 2013
 '''
 import pygame
 import math
-from Animators import *
+import os
+from .Animators import *
+
+# Calculate path to assets relative to this file
+base_path = os.path.dirname(os.path.abspath(__file__))
+assets_path = os.path.join(base_path, '..', 'assets') + os.sep
 
 class Tower(object):
 	level = 1
@@ -24,6 +29,7 @@ class Tower(object):
 	showRadius = False #whether to draw the radius or not
 	
 	def __init__(self, imagepaths):
+		self.image = [] # Initialize instance variable
 		for path in imagepaths:
 			self.image.append(pygame.image.load(path))
 		self.setName()
@@ -35,8 +41,8 @@ class Tower(object):
 		return surface
 	
 	def drawRadius(self, surface):
-		pygame.draw.circle(surface, (0,255,255), (self.location.x + self.location.width / 2, 
-			self.location.y + self.location.height / 2), int(self.distBase * self.range), 2)
+		pygame.draw.circle(surface, (0,255,255), (self.location.x + self.location.width // 2,
+			self.location.y + self.location.height // 2), int(self.distBase * self.range), 2)
 	
 	def upgrade(self):
 		self.level += 1
@@ -44,15 +50,15 @@ class Tower(object):
 		
 	def setLocation(self, box):
 		self.collideBox = box
-		self.location =  pygame.Rect(box.x - (box.width / 2), box.y - (box.height / 2), *self.scale)
+		self.location =  pygame.Rect(box.x - (box.width // 2), box.y - (box.height // 2), *self.scale)
 		
 	def setName(self):
 		self.name = "{0} Level {1}".format(self.className, self.level)
 		
 	def setTarget(self, enemies):
 		self.target = None
-		x,y = (self.collideBox.x + self.collideBox.width / 2, 
-			self.collideBox.y + self.collideBox.height / 2)
+		x,y = (self.collideBox.x + self.collideBox.width // 2,
+			self.collideBox.y + self.collideBox.height // 2)
 		for enemy in enemies:
 			if hasattr(enemy, 'flying'):
 				if self.__class__ == FighterTower:
@@ -83,11 +89,11 @@ class Tower(object):
 	
 		
 class FighterTower(Tower):
-	image = list()
+	# Removed class-level image list to avoid sharing state or loading issues
 	name = ""
 	className = ""
 	def __init__(self):
-		paths = ["../assets/fighter.gif","../assets/fighter2.gif"]
+		paths = [assets_path + "fighter.gif", assets_path + "fighter2.gif"]
 		self.damage = 6
 		self.delay = 60
 		self.range = 1.5
@@ -118,11 +124,10 @@ class FighterTower(Tower):
 			attack.render(surface)
 			
 class ArcherTower(Tower):
-	image = list()
 	name = ""
 	className = ""
 	def __init__(self):
-		paths = ["../assets/archer.gif","../assets/archer2.gif"]
+		paths = [assets_path + "archer.gif", assets_path + "archer2.gif"]
 		self.damage = 1
 		self.delay = 30
 		self.range = 4
@@ -152,11 +157,10 @@ class ArcherTower(Tower):
 			attack.render(surface)
 		
 class MageTower(Tower):
-	image = list()
 	name = ""
 	className = ""
 	def __init__(self):
-		paths = ["../assets/mage.gif","../assets/mage2.gif"]
+		paths = [assets_path + "mage.gif", assets_path + "mage2.gif"]
 		self.damage = 2
 		self.delay = 150
 		self.range = 3

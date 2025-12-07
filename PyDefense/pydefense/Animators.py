@@ -5,9 +5,11 @@ Created on Dec 22, 2013
 '''
 import pygame
 import math
-import tkSimpleDialog
 import os
-from Tkinter import *
+
+# Calculate path to assets relative to this file
+base_path = os.path.dirname(os.path.abspath(__file__))
+assets_path = os.path.join(base_path, '..', 'assets') + os.sep
 
 class SpriteAnimate(object):
 	
@@ -20,7 +22,8 @@ class SpriteAnimate(object):
 	
 	def __init__(self, full_animation):
 		self.full_animation = full_animation
-		key,value = self.full_animation.items()[0]
+		# python 3 iterators
+		key,value = list(self.full_animation.items())[0]
 		self.current_animation = value
 		self.current_frame = self.current_animation[0]
 	
@@ -41,7 +44,7 @@ class SpriteAnimate(object):
 			
 	def setAnimation(self, key):
 		if key in self.full_animation:
-			if self.current_animation <> self.full_animation[key]:
+			if self.current_animation != self.full_animation[key]:
 				self.current_animation = self.full_animation[key]
 				self.current_frame = self.current_animation[0]
 	
@@ -68,8 +71,8 @@ class SpriteSheetHelper(object):
 		self.rows = rows
 		self.columns = columns
 		self.images = [[0 for x in range(columns)] for x in range(rows)] 
-		width = image.get_width() / columns
-		height = image.get_height() / rows
+		width = image.get_width() // columns
+		height = image.get_height() // rows
 		for i in range(0,rows):
 			for j in range(0,columns):
 # 				crop = pygame.Surface((width, height))
@@ -88,17 +91,10 @@ class SpriteSheetHelper(object):
 		return img_list
 	
 class Arrow(SpriteAnimate):
-	image = pygame.image.load('../assets/arrow.png')
+	image_path = assets_path + 'arrow.png'
 	def __init__(self):
+		self.image = pygame.image.load(self.image_path)
 		helper = SpriteSheetHelper(self.image, 8, 1)
-# 		self.animations = {'left' : helper.getRow(0), 
-# 					'up-left' : helper.getRow(1),
-# 					'up' : helper.getRow(2),
-# 					'up-right' : helper.getRow(3),
-# 					'right' : helper.getRow(4),
-# 					'down-right' : helper.getRow(5),
-# 					'down' : helper.getRow(6),
-# 					'down-left' : helper.getRow(7)}
 		self.animations = {'attack' : helper.getRow(4)}
 		super(Arrow, self).__init__(self.animations)
 	
@@ -113,17 +109,10 @@ class Fireball(SpriteAnimate):
 	6 = down
 	7 = down-left
 	'''
-	image = pygame.image.load('../assets/fireball.png')
+	image_path = assets_path + 'fireball.png'
 	def __init__(self):
+		self.image = pygame.image.load(self.image_path)
 		helper = SpriteSheetHelper(self.image, 8, 8)
-# 		self.animations = {'left' : helper.getRow(0), 
-# 					'up-left' : helper.getRow(1),
-# 					'up' : helper.getRow(2),
-# 					'up-right' : helper.getRow(3),
-# 					'right' : helper.getRow(4),
-# 					'down-right' : helper.getRow(5),
-# 					'down' : helper.getRow(6),
-# 					'down-left' : helper.getRow(7)}
 		self.animations = {'attack' : helper.getRow(4)}
 		super(Fireball, self).__init__(self.animations)
 	
@@ -186,8 +175,8 @@ class ProjectilePhysics(object):
 		self.animation.update()
 	
 	def render(self, surface):
-		draw_position = (self.current_position[0] - self.animation.current_frame.width / 2,
-						self.current_position[1] - self.animation.current_frame.height / 2)
+		draw_position = (self.current_position[0] - self.animation.current_frame.width // 2,
+						self.current_position[1] - self.animation.current_frame.height // 2)
 		self.animation.render(surface, draw_position)
 	
 class FireballPhysics(ProjectilePhysics):
@@ -216,9 +205,10 @@ class ArrowPhysics(ProjectilePhysics):
 		self.animation.setRotation(self.current_direction)
 		
 class Sword(SpriteAnimate):
-	image = pygame.image.load('../assets/fighterAttack.png')
+	image_path = assets_path + 'fighterAttack.png'
 	
 	def __init__(self):
+		self.image = pygame.image.load(self.image_path)
 		helper = SpriteSheetHelper(self.image, 1, 5)
 		self.animations = {'attack':helper.getRow(0)}
 		super(Sword, self).__init__(self.animations)
@@ -246,13 +236,24 @@ class ButtonAlignment(object):
 	right = 2
 	
 class ButtonAnimate(object):
-	button_image = pygame.image.load('../assets/UI3Buttons.png')
-	text_image = pygame.image.load('../assets/UITextBox.png')
-	font = pygame.font.SysFont('quartzms', 20)
+	# Lazy loading of images
+	button_image = None
+	text_image = None
+	font = None
 	bold = False
 	color = (200, 200, 200)
 	
 	def __init__(self, style, text, position, alignment = ButtonAlignment.left):
+		if ButtonAnimate.button_image is None:
+			ButtonAnimate.button_image = pygame.image.load(assets_path + 'UI3Buttons.png')
+		if ButtonAnimate.text_image is None:
+			ButtonAnimate.text_image = pygame.image.load(assets_path + 'UITextBox.png')
+		if ButtonAnimate.font is None:
+			# quartzms is not a standard font, fallback to default or generic
+			ButtonAnimate.font = pygame.font.SysFont('quartzms', 20)
+			if ButtonAnimate.font is None:
+				ButtonAnimate.font = pygame.font.Font(None, 20)
+
 		helper = SpriteSheetHelper(self.button_image, 1, 3)
 		self.action = None
 		self.params = None
@@ -296,7 +297,7 @@ class ButtonAnimate(object):
 		text_rec.height *= 3
 		text_surface = pygame.Surface(self.text_image.get_size(),pygame.SRCALPHA, 32)
 		text_surface.blit(self.text_image, (0,0))
-		text_surface = pygame.transform.scale(text_surface, text_rec.size)
+		text_surface = pygame.transform.scale(text_surface, (int(text_rec.width), int(text_rec.height)))
 		
 		scale = float(text_rec.height) / float(self.button_rec.height)
 		btn_rec = pygame.Rect((0,0),(int(self.button_rec.width * scale), int(self.button_rec.height * scale)))
@@ -350,7 +351,8 @@ class Menu(object):
 	
 	def cursorUpdate(self, position):
 		for btn in self.buttons:
-			btn.cursorUpdate(position)
+			if btn:
+				btn.cursorUpdate(position)
 	
 	def render(self, screen):
 		s = pygame.Surface(self.background.size, pygame.SRCALPHA, 32)
@@ -358,11 +360,12 @@ class Menu(object):
 		s.fill((r,g,b,self.alpha))
 		screen.blit(s, self.background.topleft)
 		for btn in self.buttons:
-			btn.render(screen)
+			if btn:
+				btn.render(screen)
 			
 	def click(self, position):
 		for btn in self.buttons:
-			if btn.collide_rect.collidepoint(position):
+			if btn and btn.collide_rect.collidepoint(position):
 				btn.doAction()
 	
 class StartMenu(Menu):
@@ -463,7 +466,8 @@ class SaveMenu(Menu):
 		padding = h*2
 		y -= 100
 		import sqlite3
-		conn = sqlite3.connect('game.db')
+		db_path = os.path.join(os.path.dirname(__file__), 'game.db')
+		conn = sqlite3.connect(db_path)
 		conn.row_factory = sqlite3.Row
 		db = conn.cursor()
 		db.execute('SELECT * FROM save_set ORDER BY date DESC')
@@ -514,10 +518,10 @@ class SaveMenu(Menu):
 				self.selected_title = self.selected_title[:-1]
 		else:
 			try:
-				a = unichr(event.key) 
+				a = chr(event.key)
 				self.selected_title += str(a)
 			except:
-				print 'Unhandled keyboard input' #Likely a shift?
+				print('Unhandled keyboard input') #Likely a shift?
 				
 	def setTitle(self):
 		if(self.default_text == self.buttons[self.selected_slot].text):
@@ -528,8 +532,8 @@ class SaveMenu(Menu):
 	def render(self, screen):
 		super(SaveMenu, self).render(screen)
 		for index, data in self.date_text.items():
-			word_text = self.buttons[index + 1].font.render(data[0], False, 
-										(255,255,255))
-			screen.blit(word_text, data[1])
-		
+			if self.buttons[index + 1]:
+				word_text = self.buttons[index + 1].font.render(data[0], False,
+											(255,255,255))
+				screen.blit(word_text, data[1])
 		
