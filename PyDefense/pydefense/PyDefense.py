@@ -6,8 +6,12 @@ import os
 def initSave():
 	import sqlite3
 	# Ensure game.db is created in the same directory as the script or a user data dir.
-	# For simplicity, we keep it relative to this file.
-	db_path = os.path.join(os.path.dirname(__file__), 'game.db')
+	if 'ANDROID_ARGUMENT' in os.environ:
+		save_dir = os.environ.get('HOME', '.')
+	else:
+		save_dir = os.path.dirname(__file__)
+
+	db_path = os.path.join(save_dir, 'game.db')
 	conn = sqlite3.connect(db_path)
 	db = conn.cursor()
 	db.execute('''CREATE TABLE IF NOT EXISTS save_set (id INTEGER PRIMARY KEY,
